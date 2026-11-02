@@ -42,7 +42,9 @@ var CONFIG = {
   var $ = function (id) { return document.getElementById(id); };
   document.documentElement.classList.add('js');
 
-  document.title = CONFIG.name + ' · Portfolio';
+  /* page title and sharing text come from CONFIG */
+  var pageTitle = CONFIG.name + ' · Portfolio';
+  document.title = pageTitle;
   $('logo').textContent = (CONFIG.name.trim().charAt(0) || 'h').toLowerCase();
   $('badge-text').textContent = CONFIG.badge;
   $('foot').textContent = '© ' + new Date().getFullYear() + ' ' + CONFIG.name;
@@ -106,6 +108,12 @@ var CONFIG = {
   };
   function drop(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
 
+  var blurb = on.tagline ? CONFIG.tagline.trim() : 'Portfolio of ' + CONFIG.name + '.';
+  [['name', 'description'], ['property', 'og:title'], ['property', 'og:description']].forEach(function (m) {
+    var tag = document.querySelector('meta[' + m[0] + '="' + m[1] + '"]');
+    if (tag) tag.setAttribute('content', m[1] === 'og:title' ? pageTitle : blurb);
+  });
+
   if (on.tagline) $('tagline').textContent = CONFIG.tagline; else drop($('tagline'));
 
   var photoFig = document.querySelector('.photo');
@@ -161,7 +169,7 @@ var CONFIG = {
     var a = document.createElement('a');
     a.href = l.url;
     a.textContent = l.label;
-    if (/^https?:/.test(l.url)) { a.target = '_blank'; a.rel = 'me noopener'; }
+    if (/^https?:/.test(l.url)) { a.target = '_blank'; a.rel = 'me noopener'; a.appendChild(el('span', 'sr-only', ' (opens in a new tab)')); }
     li.appendChild(a);
     $('links').appendChild(li);
   });
@@ -185,6 +193,34 @@ var CONFIG = {
   } else {
     blocks.forEach(function (b) { b.classList.add('in'); });
   }
+
+  /* light / dark toggle; the saved choice was already applied in <head> */
+  var root = document.documentElement;
+  var toggle = $('theme-toggle');
+  var themeColor = document.querySelector('meta[name="theme-color"]');
+  function showTheme() {
+    var dark = root.getAttribute('data-theme') !== 'light';
+    toggle.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    if (themeColor) themeColor.setAttribute('content', dark ? '#0b1020' : '#f5f7fd');
+  }
+  showTheme();
+  toggle.addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    if (!reduceMotion) {
+      root.classList.add('theme-fade');
+      setTimeout(function () { root.classList.remove('theme-fade'); }, 450);
+    }
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+    showTheme();
+  });
+  window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function (e) {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (err) {}
+    if (saved) return;
+    root.setAttribute('data-theme', e.matches ? 'light' : 'dark');
+    showTheme();
+  });
 
   /* pointer effects: glow, avatar parallax, magnetic button. Fine pointers only. */
   var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -271,6 +307,7 @@ var CONFIG = {
   function profileLink() {
     var a = el('a', null, 'github.com/' + CONFIG.githubUser);
     a.href = profileUrl; a.target = '_blank'; a.rel = 'noopener';
+    a.appendChild(el('span', 'sr-only', ' (opens in a new tab)'));
     return a;
   }
   function showError(limited) {
@@ -305,6 +342,7 @@ var CONFIG = {
     var a = el('a');
     a.href = repo.html_url; a.target = '_blank'; a.rel = 'noopener';
     a.appendChild(el('span', 'repo-name', repo.name));
+    a.appendChild(el('span', 'sr-only', ' (opens in a new tab)'));
     if (repo.description) a.appendChild(el('span', 'repo-desc', repo.description));
     var m = el('span', 'repo-meta');
     if (repo.language) m.appendChild(el('span', 'lang', repo.language));
