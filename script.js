@@ -121,20 +121,25 @@ var CONFIG = {
 
   if (on.tagline) $('tagline').textContent = CONFIG.tagline; else drop($('tagline'));
 
-  /* the cut-out stands in the scenery by default; when About is on it moves up beside that text */
+  /* the cut-out now stands at the camp beside her avatar; when About is on, the framed photo
+     also sits beside that text. With photo off, the avatar keeps camp on her own. */
   var photoFig = document.querySelector('.photo');
   var portrait = $('portrait');
-  if (portrait) portrait.setAttribute('aria-label', 'Portrait of ' + CONFIG.name);
+  var first = CONFIG.name.trim().split(/\s+/)[0] || CONFIG.name;
   if (!on.about) drop($('about'));
   if (!CONFIG.photo) {
     drop(photoFig);
-    drop(portrait);
-  } else if (on.about) {
-    var wrap = $('about').querySelector('.about-wrap');
-    wrap.classList.add('has-photo');
-    wrap.insertBefore(photoFig, $('about-body'));
-    drop(portrait);
+    document.querySelectorAll('.camp-person, .p-only').forEach(drop);
+    $('camp-title').textContent = 'Cartoon of ' + first + ' at a mountain campsite, tending the campfire beside her tent';
+  } else {
+    $('camp-title').textContent = first + ' and her cartoon avatar at a mountain campsite, sharing the campfire beside their tent';
+    if (on.about) {
+      var wrap = $('about').querySelector('.about-wrap');
+      wrap.classList.add('has-photo');
+      wrap.insertBefore(photoFig, $('about-body'));
+    }
   }
+  drop(portrait);
   if (on.about) CONFIG.about.forEach(function (t) {
     var p = document.createElement('p');
     p.textContent = t;
@@ -305,26 +310,50 @@ var CONFIG = {
     }
   })();
 
-  /* light / dark toggle; the saved choice was already applied in <head> */
+  /* time of day: Day (light), Evening or Night (dark). The saved choice was applied in <head>;
+     the stored values stay "light" and "dark" so the 404 page keeps reading them. */
   var root = document.documentElement;
-  var toggle = $('theme-toggle');
   var themeColor = document.querySelector('meta[name="theme-color"]');
+  var BAR = { light: '#fbfaff', evening: '#2a2233', dark: '#241f2e' };
+  var radios = document.querySelectorAll('#daytime input');
+  var badge = document.querySelector('.badge');
+  var fadeTimer = 0, orbRaf = 0;
+  function mode() { var m = root.getAttribute('data-theme'); return BAR[m] ? m : 'light'; }
   function showTheme() {
-    var dark = root.getAttribute('data-theme') === 'dark';
-    toggle.setAttribute('aria-pressed', dark ? 'true' : 'false');
-    if (themeColor) themeColor.setAttribute('content', dark ? '#241f2e' : '#fbfaff');
+    var m = mode();
+    radios.forEach(function (r) { r.checked = r.value === m; });
+    if (themeColor) themeColor.setAttribute('content', BAR[m]);
+  }
+  /* the sun or moon glides from where it was to its new place along a raised arc */
+  function travel(from) {
+    if (!badge || !from) return;
+    cancelAnimationFrame(orbRaf);
+    badge.style.transform = '';
+    var to = badge.getBoundingClientRect(), dx = from.left - to.left, dy = from.top - to.top;
+    var rise = Math.min(160, 50 + Math.hypot(dx, dy) * 0.35), start = performance.now();
+    (function step(now) {
+      var u = Math.min(1, (now - start) / 1100), w = u * u * (3 - 2 * u);
+      badge.style.transform = 'translate(' + (dx * (1 - w)).toFixed(1) + 'px, ' + (dy * (1 - w) - rise * Math.sin(Math.PI * w)).toFixed(1) + 'px)';
+      if (u < 1) orbRaf = requestAnimationFrame(step); else badge.style.transform = '';
+    })(start);
+  }
+  function setMode(m) {
+    if (m === mode()) return;
+    var from = !reduceMotion && badge ? badge.getBoundingClientRect() : null;   // mid-flight too
+    if (!reduceMotion) {
+      root.classList.add('tod-fade');
+      clearTimeout(fadeTimer);
+      fadeTimer = setTimeout(function () { root.classList.remove('tod-fade'); }, 1300);
+    }
+    root.setAttribute('data-theme', m);
+    try { localStorage.setItem('theme', m); } catch (e) {}
+    showTheme();
+    if (from) travel(from);
+    if (snowRefresh) snowRefresh();
   }
   showTheme();
-  toggle.addEventListener('click', function () {
-    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    if (!reduceMotion) {
-      root.classList.add('theme-fade');
-      setTimeout(function () { root.classList.remove('theme-fade'); }, 450);
-    }
-    root.setAttribute('data-theme', next);
-    try { localStorage.setItem('theme', next); } catch (e) {}
-    showTheme();
-    if (snowRefresh) snowRefresh();
+  radios.forEach(function (r) {
+    r.addEventListener('change', function () { if (r.checked) setMode(r.value); });
   });
 
   /* the main button leans toward a nearby pointer. Fine pointers only. */
@@ -401,46 +430,164 @@ var CONFIG = {
     document.documentElement.classList.toggle('paused', document.hidden);
   });
 
-  /* camp life: her own avatar, cut at the shoulders and hips, goes about the camp on a loop.
-     One requestAnimationFrame loop drives it, and it rests while the hero is off screen. */
+  /* camp life: the portrait and her cartoon avatar share the camp on one loop.
+     The avatar is her own artwork cut at the shoulders and hips, so it can walk, wave and carry.
+     The portrait is a single standing picture, so it only breathes, sways a little and holds
+     what the avatar brings. Everything they pass between them flies on a short arc from hand to hand.
+     One requestAnimationFrame loop drives it all, and it rests while the hero is off screen. */
   (function camp() {
     var stage = document.querySelector('.camp-stage');
     if (!stage) return;
     var q = function (sel) { return stage.querySelector(sel); };
-    var simi = q('.simi'), mover = q('.mover'), shadow = q('.simi-shadow');
+    var simi = q('.simi'), mover = q('.mover'), shadow = q('.simi-shadow'), simiCast = q('.simi-cast');
     var armL = q('.arm-l'), armR = q('.arm-r'), legL = q('.leg-l'), legR = q('.leg-r');
     var lids = stage.querySelectorAll('.lid');
-    var heldLog = q('.p-log'), stick = q('.p-stick'), toast = q('.mallow.toast'), mug = q('.p-mug');
-    var thrown = q('.thrown'), fire = q('.fire');
+    var fire = q('.fire');
+    var personEl = q('.pers-move');                  // gone when CONFIG.photo is off
+    var duo = !!personEl;
 
-    var S = 0.335, FEET = 560;                       // rig scale, and the ground line in stage units
-    var SPOT = { door: 700, wood: 572, fire: 384, view: 612 };
-    var SPEED = 86, STRIDE = 30;                     // stage units per second, units per step
+    var S = 0.26, FEET = 560;                         // avatar scale, and the ground line in stage units
+    var PS = 0.344, PX = 150, PFX = 445, PFY = 1180;  // photo scale, where she stands, her feet in the picture
+    var SPOT = { side: 262, fire: 560, wood: 720, door: 830 };
+    var SPEED = 82, STRIDE = 24;                      // stage units per second, units per step
+    var FIRE_X = 400;
 
-    /* what she does, in order, forever */
-    var plan = [
-      ['wave', 2.8], ['walk', 'wood'], ['pick', 1.5], ['walk', 'fire'], ['toss', 1.5],
-      ['warm', 4.5], ['toast', 7], ['walk', 'door'], ['getmug', 1.2], ['walk', 'view'],
-      ['admire', 5.5], ['walk', 'fire'], ['warmmug', 4.5], ['walk', 'door'], ['putdown', 1.1]
+    /* what they do together, in order, forever. The avatar leads; the portrait reacts and receives. */
+    var plan = duo ? [
+      ['wave', 3], ['wavep', 2.4],
+      ['walk', 'wood'], ['pick', 1.4], ['walk', 'fire'], ['toss', 1.5], ['warm', 3.2],
+      ['walk', 'wood'], ['picksticks', 1.4], ['walk', 'side'], ['give', 1.8, 'stickP'],
+      ['walk', 'fire'], ['toast', 7.5], ['cool', 1.4],
+      ['walk', 'side'], ['take', 1.6, 'stickP'], ['walk', 'wood'], ['putsticks', 1.3],
+      ['walk', 'door'], ['getmugs', 1.3], ['walk', 'side'], ['give', 1.8, 'mugP'],
+      ['view', 6.5], ['take', 1.6, 'mugP'], ['walk', 'door'], ['putmugs', 1.2], ['walk', 'fire']
+    ] : [
+      ['wave', 3], ['walk', 'wood'], ['pick', 1.4], ['walk', 'fire'], ['toss', 1.5], ['warm', 3.2],
+      ['walk', 'wood'], ['picksticks', 1.4], ['walk', 'fire'], ['toast', 7.5],
+      ['walk', 'wood'], ['putsticks', 1.3], ['walk', 'door'], ['getmugs', 1.3],
+      ['walk', 'side'], ['view', 6.5], ['walk', 'door'], ['putmugs', 1.2], ['walk', 'fire']
     ];
 
-    var pose = { x: SPOT.door, al: 0, ar: 0, lean: 0, log: 0, stick: 0, mug: 0 };
-    var step = 0, stepStart = 0, phase = 0, nextBlink = 1.5, flareUntil = 0;
-    var raf = 0, last = 0, clock = 0, onScreen = true, released = null;
+    var pose = { x: SPOT.fire, al: 0, ar: 0, lean: 0, sa: -100 };      // avatar
+    var cur = { x: pose.x, al: 0, ar: 0, lean: 0, bob: 0, dy: 0, s: S };  // avatar as drawn this frame
+    var pp = { tilt: 0, sa: -62, nodAt: -9, nodBy: 0 };                   // portrait
+    var pcur = { rot: 0, k: 1 };
+    var step = 0, stepStart = 0, phase = 0, nextBlink = 1.5, flareUntil = 0, fired = {};
+    var raf = 0, last = 0, clock = 0, onScreen = true;
 
-    function bump(u) { return Math.sin(Math.PI * Math.min(1, Math.max(0, u))); }
-    function ease(u) { u = Math.min(1, Math.max(0, u)); return u * u * (3 - 2 * u); }
-    function approach(cur, target, dt, rate) { return cur + (target - cur) * (1 - Math.exp(-dt * rate)); }
+    function clamp01(u) { return Math.min(1, Math.max(0, u)); }
+    function bump(u) { return Math.sin(Math.PI * clamp01(u)); }
+    function ease(u) { u = clamp01(u); return u * u * (3 - 2 * u); }
+    function approach(c, target, dt, rate) { return c + (target - c) * (1 - Math.exp(-dt * rate)); }
+    function rad(d) { return d * Math.PI / 180; }
 
-    /* where the left hand is on the stage, so a thrown log leaves from her actual hand */
-    function handPoint(al, lean, bob) {
-      var a = al * Math.PI / 180, hx = 80 - 122, hy = 615 - 352;
-      var px = 122 + hx * Math.cos(a) - hy * Math.sin(a);
-      var py = 352 + hx * Math.sin(a) + hy * Math.cos(a) + bob;
-      var l = lean * Math.PI / 180, dx = px - 206.5, dy = py - 900;
-      px = 206.5 + dx * Math.cos(l) - dy * Math.sin(l);
-      py = 900 + dx * Math.sin(l) + dy * Math.cos(l);
-      return { x: pose.x - 206.5 * S + px * S, y: FEET - 900 * S + py * S };
+    /* where a hand is on the stage this frame */
+    var RIG = { L: { sx: 122, hx: 80, hy: 615 }, R: { sx: 318, hx: 360, hy: 612 } };
+    function avatarHand(side) {
+      var r = RIG[side], a = rad(side === 'L' ? cur.al : cur.ar);
+      var dx = r.hx - r.sx, dy = r.hy - 352;
+      var px = r.sx + dx * Math.cos(a) - dy * Math.sin(a);
+      var py = 352 + dx * Math.sin(a) + dy * Math.cos(a) + cur.bob;
+      var l = rad(cur.lean), ex = px - 206.5, ey = py - 900;
+      px = 206.5 + ex * Math.cos(l) - ey * Math.sin(l);
+      py = 900 + ex * Math.sin(l) + ey * Math.cos(l);
+      return { x: cur.x - 206.5 * cur.s + px * cur.s, y: FEET + cur.dy - 900 * cur.s + py * cur.s };
+    }
+    /* the arm angle that points a hand at a spot on the stage */
+    function aim(side, tx, ty) {
+      var r = RIG[side];
+      var wx = cur.x + (r.sx - 206.5) * cur.s, wy = FEET + cur.dy + (352 - 900) * cur.s;
+      var d = (Math.atan2(ty - wy, tx - wx) - Math.atan2(r.hy - 352, r.hx - r.sx)) * 180 / Math.PI;
+      while (d > 180) d -= 360;
+      while (d <= -180) d += 360;
+      return d;
+    }
+    var PHAND = { R: [556, 625] };
+    function personHand() {
+      var h = PHAND.R, a = rad(pcur.rot), dx = (h[0] - PFX) * pcur.k, dy = (h[1] - PFY) * pcur.k;
+      return {
+        x: PX + (dx * Math.cos(a) - dy * Math.sin(a)) * PS,
+        y: FEET + (dx * Math.sin(a) + dy * Math.cos(a)) * PS
+      };
+    }
+
+    /* things that change hands. Each has a resting place, or is held, or is in the air between two. */
+    function prop(sel, at) { var el = q(sel); return el ? { el: el, at: at, to: null, mal: 0, toast: 0, steam: 0, show: 1 } : null; }
+    var P = {
+      log: prop('.pr-log', 'pile'),
+      stickA: prop('.pr-stick-a', 'pileA'),
+      stickP: prop('.pr-stick-p', 'pileP'),
+      mugA: prop('.pr-mug-a', 'tent'),
+      mugP: prop('.pr-mug-p', 'tent')
+    };
+    Object.keys(P).forEach(function (k) {
+      var p = P[k];
+      if (!p) { delete P[k]; return; }
+      p.key = k;
+      p.mallow = p.el.querySelector('.mallow-g');
+      p.toastEl = p.el.querySelector('.mallow.toast');
+      p.steamEl = p.el.querySelector('.steam-g');
+    });
+
+    function anchor(where, p) {
+      var h;
+      switch (where) {
+        case 'aL':
+          h = avatarHand('L');
+          if (p.key === 'log') return { x: h.x - 2, y: h.y - 4, r: 0, f: 1, o: 1 };
+          if (p.key === 'stickA') return { x: h.x, y: h.y, r: pose.sa + cur.al * 0.3, f: 1, o: 1 };
+          if (p.key === 'stickP') return { x: h.x, y: h.y, r: -78 + cur.al * 0.3, f: 1, o: 1 };
+          return { x: h.x + 2, y: h.y - 2, r: 0, f: -1, o: 1 };
+        case 'aR':
+          h = avatarHand('R');
+          return { x: h.x - 2, y: h.y - 2, r: 0, f: 1, o: 1 };
+        case 'pR':
+          h = personHand();
+          if (p.key === 'stickP') return { x: h.x, y: h.y, r: pp.sa + pcur.rot, f: 1, o: 1 };
+          return { x: h.x - 3, y: h.y + 2, r: pcur.rot, f: 1, o: 1 };
+        case 'pile': return { x: 641, y: 497, r: 0, f: 1, o: 1 };
+        case 'pileA': return { x: 692, y: 557, r: -64, f: 1, o: 1 };     // leaning on the tent
+        case 'pileP': return { x: 702, y: 558, r: -60, f: 1, o: 1 };
+        case 'tent': return { x: 822, y: 528, r: 0, f: 1, o: 0 };
+        case 'fire': return { x: 400, y: 516, r: -200, f: 1, o: 0 };
+      }
+    }
+
+    function send(p, to, dur, lift, done) {
+      if (!p) return;
+      p.from = p.at; p.to = to; p.t0 = clock; p.dur = dur; p.lift = lift; p.done = done || null;
+    }
+    function once(key, u, at, fn) { if (u >= at && !fired[key]) { fired[key] = true; fn(); } }
+
+    function place(p, dt) {
+      var b = anchor(p.to || p.at, p), x = b.x, y = b.y, r = b.r, f = b.f, o = b.o;
+      if (p.to) {
+        var u = (clock - p.t0) / p.dur;
+        if (u >= 1) {
+          p.at = p.to; p.to = null;
+          if (p.done) p.done();
+        } else {
+          var a = anchor(p.from, p), w = ease(u), m = 1 - w;
+          var cx = (a.x + b.x) / 2, cy = Math.min(a.y, b.y) - p.lift;
+          x = m * m * a.x + 2 * m * w * cx + w * w * b.x;
+          y = m * m * a.y + 2 * m * w * cy + w * w * b.y;
+          r = a.r + (b.r - a.r) * w;
+          f = a.f + (b.f - a.f) * w;
+          o = b.o < a.o ? a.o + (b.o - a.o) * clamp01((u - 0.78) / 0.22) : a.o + (b.o - a.o) * clamp01(u / 0.3);
+        }
+      }
+      if (p.at === 'pile' && !p.to) { p.show = approach(p.show, 1, dt, 1.5); o *= p.show; }
+      if (Math.abs(f) < 0.08) f = f < 0 ? -0.08 : 0.08;
+      p.el.setAttribute('transform', 'translate(' + x.toFixed(2) + ' ' + y.toFixed(2) + ') rotate(' + r.toFixed(2) + ') scale(' + f.toFixed(3) + ' 1)');
+      p.el.style.opacity = o.toFixed(3);
+      if (p.mallow) {
+        var resting = /^pile/.test(p.to || p.at);
+        p.mal = approach(p.mal, resting ? 0 : 1, dt, 6);
+        if (p.mal < 0.03) p.toast = 0;
+        p.mallow.style.opacity = p.mal.toFixed(3);
+        p.toastEl.style.opacity = p.toast.toFixed(3);
+      }
+      if (p.steamEl) p.steamEl.style.opacity = p.steam.toFixed(3);
     }
 
     function frame(now) {
@@ -452,10 +599,13 @@ var CONFIG = {
     }
 
     function tick(dt, t) {
-      var act = plan[step], u = 0, target = { al: 2, ar: -2, lean: 0, log: pose.log, stick: 0, mug: pose.mug };
-      var walking = false, dir = 0, throwU = -1;
+      var act = plan[step], k = act[0], u = 0;
+      var hold = { L: P.stickA && /^aL/.test(P.stickA.at) || P.log && P.log.at === 'aL' || P.mugP && P.mugP.at === 'aL', R: P.mugA && P.mugA.at === 'aR' };
+      var target = { al: hold.L ? 6 : 2, ar: hold.R ? 10 : -2, lean: 0, sa: -100 };
+      var ptarget = { tilt: 0, sa: -62 };
+      var walking = false, dir = 0;
 
-      if (act[0] === 'walk') {
+      if (k === 'walk') {
         var goal = SPOT[act[1]], dist = goal - pose.x;
         dir = dist > 0 ? 1 : -1;
         if (Math.abs(dist) < 0.6) { pose.x = goal; next(t); }
@@ -465,45 +615,92 @@ var CONFIG = {
           var moveBy = Math.min(Math.abs(dist), v * dt);
           pose.x += dir * moveBy;
           phase += moveBy / STRIDE * Math.PI;
-          target.al = pose.log ? 6 : 3;
-          target.ar = pose.mug ? 10 : -3;
         }
       } else {
         u = (t - stepStart) / act[1];
         if (u >= 1) { next(t); u = 1; }
-        var k = act[0];
-        if (k === 'wave') { var held = ease(u / 0.2) * ease((1 - u) / 0.2); target.ar = (-104 + 12 * Math.sin(t * 9)) * held; }
-        else if (k === 'pick') { target.lean = -7 * bump(u); target.al = 4 + 20 * bump(u); if (u > 0.55) target.log = 1; }
+        var lift = ease(u / 0.22) * ease((1 - u) / 0.22);   // raise, hold, lower
+        if (k === 'wave') { target.ar = (-104 + 12 * Math.sin(t * 9)) * lift; }
+        else if (k === 'wavep') {
+          target.al = (138 + 12 * Math.sin(t * 9)) * lift;
+          ptarget.tilt = 1.1 * bump((u - 0.25) / 0.6);
+        }
+        else if (k === 'pick') {
+          target.lean = -7 * bump(u); target.al = 4 + 22 * bump(u);
+          once('pick', u, 0.5, function () { send(P.log, 'aL', 0.35, 4); });
+        }
         else if (k === 'toss') {
           target.al = u < 0.3 ? -6 : u < 0.6 ? 52 : 12;
           target.lean = u > 0.3 && u < 0.7 ? -3 : 0;
-          if (u >= 0.48 && !released) { released = handPoint(pose.al, pose.lean, 0); }
-          target.log = u >= 0.48 ? 0 : 1;
-          throwU = released ? (u - 0.48) / 0.4 : -1;
+          once('toss', u, 0.48, function () {
+            send(P.log, 'fire', 0.62, 66, function () {
+              fire.classList.add('flare');
+              flareUntil = clock + 1.4;
+              pp.nodAt = clock; pp.nodBy = -0.9;              // she leans back from the flare
+              P.log.at = 'pile'; P.log.show = 0;             // another log waits on the pile
+            });
+          });
         }
         else if (k === 'warm') { target.al = 30 + 3 * Math.sin(t * 5); target.ar = 16 + 3 * Math.sin(t * 5 + 1.6); }
-        else if (k === 'toast') {
-          target.stick = u < 0.93 ? 1 : 0;
-          target.al = 36 + 2 * Math.sin(t * 2.3);
-          target.ar = 4;
-          toast.style.opacity = ease((u - 0.2) / 0.7).toFixed(3);
+        else if (k === 'picksticks') {
+          target.lean = -7 * bump(u); target.al = 4 + 22 * bump(u);
+          once('s1', u, 0.42, function () { send(P.stickP, 'aL', 0.4, 6); });
+          once('s2', u, 0.55, function () { send(P.stickA, 'aL', 0.4, 6); });
         }
-        else if (k === 'getmug') { target.ar = -14 * bump(u); if (u > 0.45) target.mug = 1; }
-        else if (k === 'admire') { target.ar = 9; target.al = 2 + 2 * Math.sin(t * 0.8); target.lean = 1.3 * Math.sin(t * 0.6); }
-        else if (k === 'warmmug') { target.al = 28 + 2.5 * Math.sin(t * 4.5); target.ar = 10; }
-        else if (k === 'putdown') { target.ar = -14 * bump(u); if (u > 0.5) target.mug = 0; }
+        else if (k === 'give' || k === 'take') {
+          var h = personHand();
+          target.al = aim('L', h.x, h.y) * lift;
+          target.sa = -80;
+          if (k === 'give') once('give', u, 0.45, function () {
+            send(P[act[2]], 'pR', 0.45, 6, function () { pp.nodAt = clock; pp.nodBy = 0.9; });
+          });
+          else once('take', u, 0.45, function () { send(P[act[2]], 'aL', 0.45, 6); });
+        }
+        else if (k === 'toast') {
+          target.al = 22 + 2 * Math.sin(t * 2.3);
+          target.ar = 4;
+          target.sa = -158;
+          ptarget.sa = 24 + 1.5 * Math.sin(t * 1.7);
+          ptarget.tilt = 0.4;                                  // she leans in toward the fire a touch
+          if (P.stickA) P.stickA.toast = ease((u - 0.15) / 0.75);
+          if (P.stickP) P.stickP.toast = ease((u - 0.1) / 0.8);
+        }
+        else if (k === 'cool') { target.al = 10; target.sa = -96; }
+        else if (k === 'putsticks') {
+          target.lean = -7 * bump(u); target.al = 4 + 22 * bump(u);
+          once('p1', u, 0.42, function () { send(P.stickA, 'pileA', 0.4, 6); });
+          once('p2', u, 0.55, function () { send(P.stickP, 'pileP', 0.4, 6); });
+        }
+        else if (k === 'getmugs') {
+          target.ar = -14 * bump(u); target.al = 14 * bump(u);
+          once('m', u, 0.45, function () {
+            [P.mugA, P.mugP].forEach(function (m) { if (m) { m.steam = 1; send(m, m === P.mugA ? 'aR' : 'aL', 0.5, 2); } });
+          });
+        }
+        else if (k === 'putmugs') {
+          target.ar = -14 * bump(u); target.al = 14 * bump(u);
+          once('m', u, 0.45, function () { send(P.mugA, 'tent', 0.5, 2); send(P.mugP, 'tent', 0.5, 2); });
+        }
+        else if (k === 'view') {
+          target.ar = -16; target.al = 3 + 2 * Math.sin(t * 0.8); target.lean = 1.3 * Math.sin(t * 0.6);
+          ptarget.tilt = 0.5 * bump(u * 1.2);                  // and toward her companion while they look out
+          if (u > 0.7) [P.mugA, P.mugP].forEach(function (m) { if (m) m.steam = Math.max(0, m.steam - dt * 0.8); });
+        }
       }
 
-      /* ease every joint toward where the action wants it */
-      pose.al = approach(pose.al, target.al, dt, act[0] === 'toss' ? 16 : 7);
-      pose.ar = approach(pose.ar, target.ar, dt, act[0] === 'wave' ? 10 : 7);
-      pose.lean = approach(pose.lean, target.lean, dt, 6);
-      pose.log = target.log === 0 ? 0 : approach(pose.log, target.log, dt, 10);
-      if (act[0] === 'walk' && pose.log) pose.log = 1;
-      pose.stick = approach(pose.stick, target.stick, dt, 8);
-      pose.mug = approach(pose.mug, target.mug, dt, 9);
+      /* the stick she holds dips to the fire while they toast, and is held up otherwise */
+      if (k !== 'toast') ptarget.sa = -62;
 
-      /* the walk cycle, breathing and a little sway layered on top */
+      /* ease every joint toward where the action wants it */
+      var fast = k === 'toss' ? 16 : k === 'wave' || k === 'wavep' ? 10 : 7;
+      pose.al = approach(pose.al, target.al, dt, fast);
+      pose.ar = approach(pose.ar, target.ar, dt, fast);
+      pose.lean = approach(pose.lean, target.lean, dt, 6);
+      pose.sa = approach(pose.sa, target.sa, dt, 4);
+      pp.tilt = approach(pp.tilt, ptarget.tilt, dt, 3);
+      pp.sa = approach(pp.sa, ptarget.sa, dt, 2.6);
+
+      /* the avatar: walk cycle, breathing and a little sway layered on top */
       var s = Math.sin(phase), bob, lean = pose.lean, al = pose.al, ar = pose.ar, liftL = 0, liftR = 0, rotL = 0, rotR = 0;
       if (walking) {
         bob = -6 * Math.abs(s);
@@ -520,34 +717,34 @@ var CONFIG = {
         al += 1.2 * Math.sin(t * 1.1);
         ar -= 1.2 * Math.sin(t * 1.3);
       }
+      cur.x = pose.x; cur.al = al; cur.ar = ar; cur.lean = lean; cur.bob = bob;
 
-      simi.setAttribute('transform', 'translate(' + (pose.x - 206.5 * S).toFixed(2) + ' ' + (FEET - 900 * S).toFixed(2) + ') scale(' + S + ')');
+      /* passing the fire she steps a little toward the viewer, so she goes round it, not through it */
+      var near = ease(1 - Math.abs(pose.x - FIRE_X) / 150), dy = 9 * near, sc = S * (1 + 0.04 * near);
+      cur.dy = dy; cur.s = sc;
+      simi.setAttribute('transform', 'translate(' + (pose.x - 206.5 * sc).toFixed(2) + ' ' + (FEET + dy - 900 * sc).toFixed(2) + ') scale(' + sc.toFixed(4) + ')');
       mover.setAttribute('transform', 'rotate(' + lean.toFixed(2) + ' 206.5 900) translate(0 ' + bob.toFixed(2) + ')');
       armL.setAttribute('transform', 'rotate(' + al.toFixed(2) + ' 122 352)');
       armR.setAttribute('transform', 'rotate(' + ar.toFixed(2) + ' 318 352)');
       legL.setAttribute('transform', 'translate(0 ' + liftL.toFixed(2) + ') rotate(' + rotL.toFixed(2) + ' 172 512)');
       legR.setAttribute('transform', 'translate(0 ' + liftR.toFixed(2) + ') rotate(' + rotR.toFixed(2) + ' 282 512)');
       shadow.setAttribute('cx', pose.x.toFixed(1));
-      shadow.setAttribute('rx', (54 + bob * 0.7).toFixed(1));
-      heldLog.style.opacity = pose.log.toFixed(3);
-      stick.style.opacity = pose.stick.toFixed(3);
-      mug.style.opacity = pose.mug.toFixed(3);
-      if (act[0] !== 'toast' && pose.stick < 0.05) toast.style.opacity = '0';
+      shadow.setAttribute('cy', (561 + dy).toFixed(1));
+      shadow.setAttribute('rx', (42 + bob * 0.5).toFixed(1));
+      if (simiCast) simiCast.setAttribute('transform', 'translate(' + pose.x.toFixed(1) + ' ' + (559 + dy).toFixed(1) + ')');
 
-      /* a log in flight: leaves her hand, arcs over and lands in the fire */
-      if (throwU >= 0 && throwU <= 1) {
-        var from = released, w = ease(throwU);
-        var x = (1 - w) * (1 - w) * from.x + 2 * (1 - w) * w * ((from.x + 263) / 2) + w * w * 263;
-        var y = (1 - w) * (1 - w) * from.y + 2 * (1 - w) * w * (Math.min(from.y, 500) - 70) + w * w * 528;
-        thrown.setAttribute('transform', 'translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ') rotate(' + (-200 * w).toFixed(1) + ') scale(.42 .47)');
-        thrown.style.opacity = throwU < 0.92 ? '1' : '0';
-        if (throwU > 0.9 && t > flareUntil) { fire.classList.add('flare'); flareUntil = t + 1.4; }
-      } else {
-        thrown.style.opacity = '0';
+      /* the portrait: slow breath and sway about her feet, plus a small lean when something happens */
+      if (personEl) {
+        var nod = pp.nodBy * bump((t - pp.nodAt) / 1.1);
+        pcur.rot = 0.35 * Math.sin(t * 0.55) + pp.tilt + nod;
+        pcur.k = 1 + 0.0035 * Math.sin(t * 1.7);
+        personEl.setAttribute('transform', 'rotate(' + pcur.rot.toFixed(3) + ' ' + PFX + ' ' + PFY + ') translate(' + PFX + ' ' + PFY + ') scale(' + pcur.k.toFixed(4) + ') translate(' + -PFX + ' ' + -PFY + ')');
       }
-      if (flareUntil && t > flareUntil - 0.2) { fire.classList.remove('flare'); }
 
-      /* she blinks every few seconds, quickly, like anyone does */
+      for (var key in P) place(P[key], dt);
+      if (flareUntil && t > flareUntil - 0.2) { fire.classList.remove('flare'); flareUntil = 0; }
+
+      /* the avatar blinks every few seconds, quickly, like anyone does */
       var lid = 0;
       if (t > nextBlink) {
         var bt = (t - nextBlink) / 0.17;
@@ -558,18 +755,21 @@ var CONFIG = {
     }
 
     function next(t) {
-      released = null;
+      fired = {};
       step = (step + 1) % plan.length;
       stepStart = t;
     }
 
     if (reduceMotion) {
-      /* a single, still moment by the fire */
+      /* a single, still moment: toasting marshmallows together by the fire */
+      plan = [['toast', 1e9]];
       pose.x = SPOT.fire;
-      pose.al = 28;
-      pose.ar = 14;
-      plan = [['warm', 1e9]];
-      tick(0, 0);
+      if (P.stickA) { P.stickA.at = 'aL'; P.stickA.mal = 1; }
+      if (P.stickP) { P.stickP.at = 'pR'; P.stickP.mal = 1; }
+      pose.sa = -158; pp.sa = 24;
+      tick(10, 0);
+      tick(10, 0);
+      for (var key in P) if (P[key].toastEl) P[key].toastEl.style.opacity = '0.45';
       return;
     }
 
