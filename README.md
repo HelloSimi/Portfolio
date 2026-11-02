@@ -16,11 +16,21 @@ Keep the quotes and commas as they are in the file. If the page goes blank, a qu
 
 ## Show or hide sections
 
-`sections` has one switch for each part of the page: `tagline`, `about`, `skills`, `projects` and `contact`. Set a switch to `true` to show that part and `false` to hide it. A hidden part disappears completely, including its link in the top menu, and the page spacing adjusts by itself. Your text stays in `CONFIG`, so you can turn a part on later by changing one word.
+`sections` has one switch for each part of the page: `tagline`, `about`, `skills`, `treks` (the Trails list), `projects` and `contact`. Set a switch to `true` to show that part and `false` to hide it. A hidden part disappears completely, including its link in the top menu, and the page spacing adjusts by itself. Your text stays in `CONFIG`, so you can turn a part on later by changing one word.
 
 The portrait photo has its own switch, `photo`. It can stay on even when the About text is off, and it is then shown as a framed portrait under the intro.
 
 A part that is switched on but has no text is skipped too.
+
+## Add your trails
+
+Turn on `sections.treks` and fill the `treks` list to show a Trails section. Each entry looks like this:
+
+```
+{ place: 'Trail or peak name', note: 'One short line about it.', year: '2024' }
+```
+
+`note` and `year` are optional. The list starts empty, with one example commented out, and the section stays hidden until you add something.
 
 ## Choose which projects show
 
@@ -33,7 +43,7 @@ Both are empty by default. Forks that are not pinned stay hidden. When your repo
 
 ## Light and dark theme
 
-The site follows the visitor's device setting. The round button in the top corner switches between light and dark, and the choice is remembered in that browser. To change the colours, edit the variables at the top of `style.css` (`:root` for dark, `:root[data-theme="light"]` for light).
+The site is light by default. The round button in the top corner switches to a darker night view, and the choice is remembered in that browser. To change the colours, spacing, corner radius or shadow, edit the variables at the top of `style.css` (`:root` for the light palette, `:root[data-theme="dark"]` for the night one).
 
 The page also sets its title and sharing text from `CONFIG`: the tagline when it is shown, otherwise a short line with your name.
 

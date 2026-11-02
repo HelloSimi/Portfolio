@@ -11,10 +11,14 @@ var CONFIG = {
     tagline: false,
     about: false,
     skills: false,
+    treks: false,
     projects: true,
     contact: true
   },
   photo: true,                             // portrait photo; works even when the About text is hidden
+  treks: [                                 // walks and treks, shown when sections.treks is true
+    // { place: 'Trail or peak name', note: 'One short line about it.', year: '2024' }
+  ],
   pinned: [],                              // repository names to show first, e.g. ['my-best-project']
   hideRepos: [],                           // repository names to leave out
   about: [
@@ -103,6 +107,7 @@ var CONFIG = {
     tagline: flags.tagline && has(CONFIG.tagline),
     about: flags.about && has(CONFIG.about),
     skills: flags.skills && has(CONFIG.skills),
+    treks: flags.treks && has(CONFIG.treks),
     projects: !!flags.projects,
     contact: flags.contact && (has(CONFIG.contactText) || has(CONFIG.links))
   };
@@ -116,26 +121,39 @@ var CONFIG = {
 
   if (on.tagline) $('tagline').textContent = CONFIG.tagline; else drop($('tagline'));
 
+  /* the cut-out stands in the scenery by default; when About is on it moves up beside that text */
   var photoFig = document.querySelector('.photo');
-  if (!on.about) {
-    drop($('about'));
-    if (CONFIG.photo) {
-      var portrait = document.createElement('section');
-      portrait.className = 'portrait';
-      portrait.setAttribute('aria-label', 'Portrait of ' + CONFIG.name);
-      portrait.appendChild(photoFig);
-      document.querySelector('.hero').insertAdjacentElement('afterend', portrait);
-    }
-  } else {
-    if (CONFIG.photo) $('about').querySelector('.about-wrap').classList.add('has-photo'); else drop(photoFig);
-    CONFIG.about.forEach(function (t) {
-      var p = document.createElement('p');
-      p.textContent = t;
-      $('about-body').appendChild(p);
-    });
+  var portrait = $('portrait');
+  if (portrait) portrait.setAttribute('aria-label', 'Portrait of ' + CONFIG.name);
+  if (!on.about) drop($('about'));
+  if (!CONFIG.photo) {
+    drop(photoFig);
+    drop(portrait);
+  } else if (on.about) {
+    var wrap = $('about').querySelector('.about-wrap');
+    wrap.classList.add('has-photo');
+    wrap.insertBefore(photoFig, $('about-body'));
+    drop(portrait);
   }
+  if (on.about) CONFIG.about.forEach(function (t) {
+    var p = document.createElement('p');
+    p.textContent = t;
+    $('about-body').appendChild(p);
+  });
 
   if (!on.skills) drop($('work'));
+  if (!on.treks) drop($('treks'));
+  else CONFIG.treks.forEach(function (t) {
+    var li = document.createElement('li');
+    var gear = ['icon-boot', 'icon-pack', 'icon-lantern'];
+    li.innerHTML = '<svg class="gi" aria-hidden="true" focusable="false"><use href="#' + gear[$('trek-list').children.length % 3] + '"/></svg>';
+    var mid = el('div');
+    mid.appendChild(el('span', 'trek-place', t.place || ''));
+    if (t.note) mid.appendChild(el('span', 'trek-note', t.note));
+    li.appendChild(mid);
+    if (t.year) li.appendChild(el('span', 'trek-year', String(t.year)));
+    $('trek-list').appendChild(li);
+  });
   if (!on.projects) drop($('projects'));
   if (!on.contact) drop($('contact'));
   else if (has(CONFIG.contactText)) $('contact-text').textContent = CONFIG.contactText;
@@ -152,6 +170,21 @@ var CONFIG = {
     if (!$(a.getAttribute('href').slice(1))) drop(a);
   });
   if (!nav.children.length) drop(nav);
+
+  /* ridge and pine silhouettes stand in for plain rules between the sections that survived */
+  var shown = document.querySelectorAll('main .block');
+  for (var di = 1; di < shown.length; di++) {
+    shown[di].insertAdjacentElement('beforebegin', divider(di));
+  }
+  if (shown.length) document.querySelector('.foot').insertAdjacentElement('beforebegin', divider(shown.length));
+  function divider(i) {
+    var t = $(i % 2 ? 'div-pine' : 'div-ridge');
+    var holder = document.createElement('div');
+    holder.className = 'divider';
+    holder.setAttribute('aria-hidden', 'true');
+    if (t) holder.appendChild(t.content.cloneNode(true));
+    return holder;
+  }
 
   (on.skills ? CONFIG.skills : []).forEach(function (s) {
     var li = document.createElement('li');
@@ -179,7 +212,7 @@ var CONFIG = {
   blocks.forEach(function (b) {
     var items = b.matches('.portrait') ? [b.firstElementChild] : [b.querySelector('h2')].concat(
       Array.prototype.slice.call(b.querySelector('.block-body').children).reduce(function (all, el) {
-        return all.concat(el.matches('.skills, .links') ? Array.prototype.slice.call(el.children) : [el]);
+        return all.concat(el.matches('.skills, .links, .treks') ? Array.prototype.slice.call(el.children) : [el]);
       }, []));
     items.forEach(function (el, i) { if (!el) return; el.classList.add('rv'); el.style.setProperty('--d', i); });
   });
@@ -194,18 +227,96 @@ var CONFIG = {
     blocks.forEach(function (b) { b.classList.add('in'); });
   }
 
+  /* a few small flakes drifting behind the hero */
+  var snowRefresh = null;
+  (function setupSnow() {
+    var canvas = $('snow');
+    if (!canvas) return;
+    if (reduceMotion) { drop(canvas); return; }
+    var band = document.querySelector('.scene-band');
+    var ctx = canvas.getContext('2d');
+    var flakes = [], w = 0, h = 0, raf = 0, last = 0, onScreen = true;
+    var tones = ['169, 201, 226', '207, 226, 242'];
+
+    function readColors() {
+      var cs = getComputedStyle(document.documentElement);
+      ['--snow-a', '--snow-b'].forEach(function (name, i) {
+        var v = cs.getPropertyValue(name).trim();
+        if (v) tones[i] = v;
+      });
+    }
+    function flake(y) {
+      return {
+        x: Math.random() * w,
+        y: y,
+        r: 0.9 + Math.random() * 1.5,
+        fall: 9 + Math.random() * 15,
+        sway: 5 + Math.random() * 9,
+        phase: Math.random() * Math.PI * 2,
+        tone: Math.random() < 0.5 ? 0 : 1,
+        alpha: 0.35 + Math.random() * 0.4
+      };
+    }
+    function size() {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = band.clientWidth;
+      h = band.clientHeight;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var count = Math.max(10, Math.min(42, Math.round(w / 28)));
+      while (flakes.length > count) flakes.pop();
+      while (flakes.length < count) flakes.push(flake(Math.random() * h));
+    }
+    function draw(now) {
+      raf = requestAnimationFrame(draw);
+      var dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      ctx.clearRect(0, 0, w, h);
+      for (var i = 0; i < flakes.length; i++) {
+        var f = flakes[i];
+        f.y += f.fall * dt;
+        f.phase += dt;
+        if (f.y - f.r > h) { flakes[i] = flake(-4); continue; }
+        ctx.beginPath();
+        ctx.arc(f.x + Math.sin(f.phase) * f.sway, f.y, f.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(' + tones[f.tone] + ', ' + f.alpha + ')';
+        ctx.fill();
+      }
+    }
+    function run(go) {
+      if (go && !raf) { last = performance.now(); raf = requestAnimationFrame(draw); }
+      if (!go && raf) { cancelAnimationFrame(raf); raf = 0; }
+    }
+
+    readColors();
+    size();
+    run(true);
+    snowRefresh = readColors;
+
+    if (window.ResizeObserver) new ResizeObserver(size).observe(band);
+    else window.addEventListener('resize', size);
+    document.addEventListener('visibilitychange', function () { run(!document.hidden && onScreen); });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        onScreen = entries[0].isIntersecting;
+        run(onScreen && !document.hidden);
+      }).observe(band);
+    }
+  })();
+
   /* light / dark toggle; the saved choice was already applied in <head> */
   var root = document.documentElement;
   var toggle = $('theme-toggle');
   var themeColor = document.querySelector('meta[name="theme-color"]');
   function showTheme() {
-    var dark = root.getAttribute('data-theme') !== 'light';
+    var dark = root.getAttribute('data-theme') === 'dark';
     toggle.setAttribute('aria-pressed', dark ? 'true' : 'false');
-    if (themeColor) themeColor.setAttribute('content', dark ? '#0b1020' : '#f5f7fd');
+    if (themeColor) themeColor.setAttribute('content', dark ? '#241f2e' : '#fbfaff');
   }
   showTheme();
   toggle.addEventListener('click', function () {
-    var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     if (!reduceMotion) {
       root.classList.add('theme-fade');
       setTimeout(function () { root.classList.remove('theme-fade'); }, 450);
@@ -213,25 +324,17 @@ var CONFIG = {
     root.setAttribute('data-theme', next);
     try { localStorage.setItem('theme', next); } catch (e) {}
     showTheme();
-  });
-  window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function (e) {
-    var saved = null;
-    try { saved = localStorage.getItem('theme'); } catch (err) {}
-    if (saved) return;
-    root.setAttribute('data-theme', e.matches ? 'light' : 'dark');
-    showTheme();
+    if (snowRefresh) snowRefresh();
   });
 
-  /* pointer effects: glow, avatar parallax, magnetic button. Fine pointers only. */
+  /* pointer effects: avatar parallax and magnetic button. Fine pointers only. */
   var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   var art = document.querySelector('.hero-art');
-  var glow = document.querySelector('.glow');
   var ptr = { x: 0, y: 0, raf: 0 };
   function tick() {
     ptr.raf = 0;
-    glow.style.transform = 'translate3d(' + ptr.x + 'px,' + ptr.y + 'px,0)';
-    art.style.setProperty('--px', ((ptr.x / innerWidth - 0.5) * 16).toFixed(1) + 'px');
-    art.style.setProperty('--py', ((ptr.y / innerHeight - 0.5) * 12).toFixed(1) + 'px');
+    art.style.setProperty('--px', ((ptr.x / innerWidth - 0.5) * 14).toFixed(1) + 'px');
+    art.style.setProperty('--py', ((ptr.y / innerHeight - 0.5) * 10).toFixed(1) + 'px');
     if (cta.parentNode) {
       var r = cta.getBoundingClientRect(), dx = ptr.x - (r.left + r.width / 2), dy = ptr.y - (r.top + r.height / 2);
       var near = Math.hypot(dx, dy) < r.width / 2 + 70;
@@ -242,21 +345,54 @@ var CONFIG = {
   if (fine && !reduceMotion) {
     window.addEventListener('pointermove', function (e) {
       ptr.x = e.clientX; ptr.y = e.clientY;
-      glow.classList.add('on');
       if (!ptr.raf) ptr.raf = requestAnimationFrame(tick);
     }, { passive: true });
-    document.documentElement.addEventListener('pointerleave', function () { glow.classList.remove('on'); });
   }
 
-  /* thin scroll progress bar */
-  var bar = document.querySelector('.progress');
-  var barRaf = 0;
+  /* the walker climbs the trail as the page scrolls, and the ridge drifts a little */
+  var trail = document.querySelector('.trail');
+  var scene = document.querySelector('.scene');
+  var sceneBand = document.querySelector('.scene-band');
+  var scrollRaf = 0;
   function progress() {
-    barRaf = 0;
+    scrollRaf = 0;
     var max = document.documentElement.scrollHeight - innerHeight;
-    bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, scrollY / max) : 0) + ')';
+    var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    trail.style.setProperty('--p', p.toFixed(4));
+    if (trekTrail) {
+      /* boot prints appear as the ground line climbs into view */
+      var g = sceneBand.getBoundingClientRect();
+      var seen = reduceMotion ? 1 : (innerHeight - g.bottom) / Math.max(1, innerHeight * 0.55) + 0.35;
+      trekTrail.style.setProperty('--draw', Math.min(1, Math.max(0, seen)).toFixed(3));
+    }
+    if (scene && !reduceMotion) {
+      /* 0 at the top of the page, 1 once the band has scrolled by its own height */
+      var moved = Math.min(1.4, Math.max(0, window.scrollY / Math.max(1, sceneBand.offsetHeight)));
+      scene.style.setProperty('--sy', moved.toFixed(3));
+    }
   }
-  window.addEventListener('scroll', function () { if (!barRaf) barRaf = requestAnimationFrame(progress); }, { passive: true });
+
+  var trekTrail = document.querySelector('.trek-trail');
+
+  /* the compass needle settles the first time the footer comes into view */
+  var compass = document.querySelector('.compass');
+  if (compass) {
+    if (reduceMotion || !('IntersectionObserver' in window)) compass.classList.add('in');
+    else {
+      var cio = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) { compass.classList.add('in'); cio.disconnect(); }
+      }, { threshold: 0.4 });
+      cio.observe(compass);
+    }
+  }
+
+  /* the camp only burns while it is on screen */
+  if (sceneBand && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      sceneBand.classList.toggle('band-rest', !entries[0].isIntersecting);
+    }).observe(sceneBand);
+  }
+  window.addEventListener('scroll', function () { if (!scrollRaf) scrollRaf = requestAnimationFrame(progress); }, { passive: true });
   window.addEventListener('resize', progress);
   progress();
 
@@ -361,10 +497,8 @@ var CONFIG = {
       if (e.pointerType !== 'mouse') return;
       var r = li.getBoundingClientRect();
       var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-      li.style.setProperty('--ry', ((x - 0.5) * 6).toFixed(2) + 'deg');
+      li.style.setProperty('--ry', ((x - 0.5) * 5).toFixed(2) + 'deg');
       li.style.setProperty('--rx', ((0.5 - y) * 5).toFixed(2) + 'deg');
-      li.style.setProperty('--hx', (x * 100).toFixed(0) + '%');
-      li.style.setProperty('--hy', (y * 100).toFixed(0) + '%');
     });
     li.addEventListener('pointerleave', function () {
       li.style.removeProperty('--rx');
