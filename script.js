@@ -45,15 +45,16 @@ var CONFIG = {
   $('badge-text').textContent = CONFIG.badge;
   $('foot').textContent = '© ' + new Date().getFullYear() + ' ' + CONFIG.name;
 
-  /* name, split into letters that wobble when touched */
+  /* name, split into letters that decode on load and wobble when touched */
   var nameEl = $('name');
+  var letters = [];
   nameEl.setAttribute('aria-label', CONFIG.name);
   CONFIG.name.split('').forEach(function (ch, i) {
     var s = document.createElement('span');
     s.className = 'ch';
     s.setAttribute('aria-hidden', 'true');
     s.textContent = ch === ' ' ? ' ' : ch;
-    s.style.setProperty('--i', i);
+    letters.push({ el: s, ch: ch });
     s.addEventListener('pointerenter', function () {
       if (reduceMotion) return;
       s.classList.remove('wob');
@@ -62,6 +63,34 @@ var CONFIG = {
     });
     nameEl.appendChild(s);
   });
+
+  /* each letter flickers through random glyphs, then settles; total under 1.2s.
+     Widths are fixed first so the line does not jiggle while glyphs change. */
+  function decodeName() {
+    var glyphs = 'abcdefghijklmnopqrstuvwxyz0123456789<>/_-+*=#';
+    letters.forEach(function (l) { l.el.style.width = l.el.offsetWidth + 'px'; });
+    if (reduceMotion) { letters.forEach(function (l) { l.el.classList.add('on'); }); return; }
+    var start = performance.now();
+    (function frame(now) {
+      var t = now - start, done = true;
+      letters.forEach(function (l, i) {
+        var settle = 350 + i * Math.min(60, 800 / letters.length);
+        if (l.ch === ' ' || t >= settle) {
+          if (l.ch !== ' ' && l.el.textContent !== l.ch) l.el.textContent = l.ch;
+          l.el.classList.remove('scr');
+        } else {
+          done = false;
+          if (t > i * 25) {
+            l.el.classList.add('on', 'scr');
+            l.el.textContent = glyphs.charAt(Math.floor(Math.random() * glyphs.length));
+          }
+        }
+        if (t >= i * 25) l.el.classList.add('on');
+      });
+      if (!done) requestAnimationFrame(frame);
+    })(start);
+  }
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(decodeName);
 
   /* optional parts: a part that is off or empty is removed from the page entirely */
   var flags = CONFIG.sections || {};
@@ -135,18 +164,68 @@ var CONFIG = {
     $('links').appendChild(li);
   });
 
-  /* blocks fade in when scrolled into view */
-  var blocks = document.querySelectorAll('.block');
+  /* sections reveal with staggered children when scrolled into view */
+  var blocks = document.querySelectorAll('.block, .portrait');
+  blocks.forEach(function (b) {
+    var items = b.matches('.portrait') ? [b.firstElementChild] : [b.querySelector('h2')].concat(
+      Array.prototype.slice.call(b.querySelector('.block-body').children).reduce(function (all, el) {
+        return all.concat(el.matches('.skills, .links') ? Array.prototype.slice.call(el.children) : [el]);
+      }, []));
+    items.forEach(function (el, i) { if (!el) return; el.classList.add('rv'); el.style.setProperty('--d', i); });
+  });
   if ('IntersectionObserver' in window && !reduceMotion) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
       });
-    }, { threshold: 0.15 });
+    }, { threshold: 0.12 });
     blocks.forEach(function (b) { io.observe(b); });
   } else {
     blocks.forEach(function (b) { b.classList.add('in'); });
   }
+
+  /* pointer effects: glow, avatar parallax, magnetic button. Fine pointers only. */
+  var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var art = document.querySelector('.hero-art');
+  var glow = document.querySelector('.glow');
+  var ptr = { x: 0, y: 0, raf: 0 };
+  function tick() {
+    ptr.raf = 0;
+    glow.style.transform = 'translate3d(' + ptr.x + 'px,' + ptr.y + 'px,0)';
+    art.style.setProperty('--px', ((ptr.x / innerWidth - 0.5) * 16).toFixed(1) + 'px');
+    art.style.setProperty('--py', ((ptr.y / innerHeight - 0.5) * 12).toFixed(1) + 'px');
+    if (cta.parentNode) {
+      var r = cta.getBoundingClientRect(), dx = ptr.x - (r.left + r.width / 2), dy = ptr.y - (r.top + r.height / 2);
+      var near = Math.hypot(dx, dy) < r.width / 2 + 70;
+      cta.style.setProperty('--mx', near ? (dx * 0.25).toFixed(1) + 'px' : '0px');
+      cta.style.setProperty('--my', near ? (dy * 0.35).toFixed(1) + 'px' : '0px');
+    }
+  }
+  if (fine && !reduceMotion) {
+    window.addEventListener('pointermove', function (e) {
+      ptr.x = e.clientX; ptr.y = e.clientY;
+      glow.classList.add('on');
+      if (!ptr.raf) ptr.raf = requestAnimationFrame(tick);
+    }, { passive: true });
+    document.documentElement.addEventListener('pointerleave', function () { glow.classList.remove('on'); });
+  }
+
+  /* thin scroll progress bar */
+  var bar = document.querySelector('.progress');
+  var barRaf = 0;
+  function progress() {
+    barRaf = 0;
+    var max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, scrollY / max) : 0) + ')';
+  }
+  window.addEventListener('scroll', function () { if (!barRaf) barRaf = requestAnimationFrame(progress); }, { passive: true });
+  window.addEventListener('resize', progress);
+  progress();
+
+  /* stop the ambient animation while the tab is hidden */
+  document.addEventListener('visibilitychange', function () {
+    document.documentElement.classList.toggle('paused', document.hidden);
+  });
 
   /* projects from GitHub */
   var list = $('repo-list');
