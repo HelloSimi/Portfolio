@@ -18,7 +18,7 @@ Keep the quotes and commas as they are in the file. If the page goes blank, a qu
 
 `sections` has one switch for each part of the page: `tagline`, `about`, `skills`, `treks` (the Trails list), `projects` and `contact`. Set a switch to `true` to show that part and `false` to hide it. A hidden part disappears completely, including its link in the top menu, and the page spacing adjusts by itself. Your text stays in `CONFIG`, so you can turn a part on later by changing one word.
 
-The portrait photo has its own switch, `photo`. It can stay on even when the About text is off, and it is then shown as a framed portrait under the intro.
+The portrait photo has its own switch, `photo`. It puts the cut-out photo in the camp scene next to the avatar, and when the About text is on it also appears beside that text. Set it to `false` and the avatar keeps camp on her own.
 
 A part that is switched on but has no text is skipped too.
 
@@ -41,9 +41,9 @@ Projects are loaded from your public GitHub repositories and kept for ten minute
 
 Both are empty by default. Forks that are not pinned stay hidden. When your repositories use two or more languages, filter buttons appear above the list.
 
-## Light and dark theme
+## Day, evening and night
 
-The site is light by default. The round button in the top corner switches to a darker night view, and the choice is remembered in that browser. To change the colours, spacing, corner radius or shadow, edit the variables at the top of `style.css` (`:root` for the light palette, `:root[data-theme="dark"]` for the night one).
+The site opens in Day. The three small buttons in the top corner (sun, sunset and moon) switch the whole page and the camp scene to Day, Evening or Night, and the choice is remembered in that browser. To change the colours, spacing, corner radius or shadow, edit the variables at the top of `style.css`: `:root` holds the Day palette, `:root[data-theme="evening"]` the Evening one and `:root[data-theme="dark"]` the Night one.
 
 The page also sets its title and sharing text from `CONFIG`: the tagline when it is shown, otherwise a short line with your name.
 
