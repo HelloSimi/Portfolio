@@ -69,89 +69,259 @@
 
   <main id="top" tabindex="-1">
     <div class="scene-band">
-      <svg class="sky" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
-        <g class="sc-stars" fill="var(--accent)">
-          <circle cx="188" cy="54" r="1.7" opacity=".28"/>
-          <circle cx="366" cy="102" r="1.2" opacity=".20"/>
-          <circle cx="610" cy="40" r="1.5" opacity=".24"/>
-          <circle cx="842" cy="88" r="1.2" opacity=".18"/>
-          <circle cx="1032" cy="48" r="1.8" opacity=".28"/>
-          <circle cx="1228" cy="106" r="1.2" opacity=".20"/>
-          <circle cx="1354" cy="62" r="1.4" opacity=".24"/>
-          <circle cx="508" cy="150" r="1.1" opacity=".16"/>
-        </g>
-      </svg>
-
-      <svg class="scene" viewBox="0 0 1440 460" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-        <defs>
-          <path id="pine" d="M0 -30 L7 -16 L4 -16 L10 -5 L6 -5 L13 4 L-13 4 L-6 -5 L-10 -5 L-4 -16 L-7 -16 Z"/>
-        </defs>
-
-        <g class="sc-far" fill="var(--ice)">
-          <path d="M0 190 L120 110 L190 150 L300 56 L396 140 L470 100 L560 168 L660 86 L762 156 L870 72 L980 150 L1090 104 L1200 164 L1320 90 L1440 156 L1440 460 L0 460 Z"/>
-          <g fill="var(--surface)" opacity=".8">
-            <path d="M300 56 L330 86 L311 90 L284 83 Z"/>
-            <path d="M660 86 L687 113 L669 117 L645 111 Z"/>
-            <path d="M870 72 L899 100 L880 104 L855 97 Z"/>
-            <path d="M1320 90 L1346 115 L1328 119 L1305 113 Z"/>
+      <section class="hero">
+        <svg class="sky-art" viewBox="0 0 1440 520" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
+          <g class="sc-stars">
+            <circle cx="188" cy="54" r="1.7"/><circle cx="366" cy="122" r="1.2"/><circle cx="610" cy="40" r="1.5"/>
+            <circle cx="842" cy="98" r="1.2"/><circle cx="1032" cy="48" r="1.8"/><circle cx="1228" cy="126" r="1.2"/>
+            <circle cx="1354" cy="62" r="1.4"/><circle cx="508" cy="180" r="1.1"/><circle cx="74" cy="160" r="1.3"/>
           </g>
-        </g>
-
-        <g class="sc-mid" fill="var(--lavender)">
-          <path d="M0 270 L150 196 L250 238 L360 170 L470 226 L600 184 L720 246 L840 190 L960 240 L1080 200 L1200 256 L1320 210 L1440 250 L1440 460 L0 460 Z"/>
-        </g>
-
-        <g class="sc-near" fill="var(--blush)">
-          <path d="M0 350 L160 300 L280 334 L420 288 L560 330 L700 298 L840 338 L980 302 L1120 338 L1280 306 L1440 344 L1440 460 L0 460 Z"/>
-        </g>
-
-        <g class="sc-trees">
-          <g fill="var(--pine-2)">
-            <use href="#pine" transform="translate(104 454) scale(.66)"/>
-            <use href="#pine" transform="translate(262 456) scale(.56)"/>
-            <use href="#pine" transform="translate(470 454) scale(.72)"/>
-            <use href="#pine" transform="translate(898 454) scale(.82)"/>
-            <use href="#pine" transform="translate(1012 456) scale(.66)"/>
-            <use href="#pine" transform="translate(1148 454) scale(.88)"/>
-            <use href="#pine" transform="translate(1286 456) scale(.7)"/>
+          <g class="clouds">
+            <g transform="translate(150 150)"><g class="cloud c1">
+              <ellipse cx="0" cy="0" rx="78" ry="20"/><ellipse cx="-30" cy="-12" rx="34" ry="22"/><ellipse cx="18" cy="-20" rx="40" ry="28"/>
+            </g></g>
+            <g transform="translate(760 92)"><g class="cloud c2">
+              <ellipse cx="0" cy="0" rx="96" ry="22"/><ellipse cx="-36" cy="-14" rx="40" ry="24"/><ellipse cx="22" cy="-24" rx="48" ry="32"/><ellipse cx="62" cy="-8" rx="30" ry="18"/>
+            </g></g>
+            <g transform="translate(1290 230)"><g class="cloud c3">
+              <ellipse cx="0" cy="0" rx="64" ry="16"/><ellipse cx="-20" cy="-10" rx="28" ry="18"/><ellipse cx="16" cy="-16" rx="32" ry="22"/>
+            </g></g>
           </g>
-          <g fill="var(--pine)">
-            <use href="#pine" transform="translate(176 458) scale(.86)"/>
-            <use href="#pine" transform="translate(556 458) scale(.94)"/>
-            <use href="#pine" transform="translate(956 458) scale(1.06)"/>
-            <use href="#pine" transform="translate(1086 458) scale(.9)"/>
-            <use href="#pine" transform="translate(1222 458) scale(1.1)"/>
-            <use href="#pine" transform="translate(1352 458) scale(.96)"/>
+          <g class="birds">
+            <g transform="translate(0 168)"><g class="bird b1"><path d="M-20 0 Q-10 -12 0 0 Q10 -12 20 0"/></g></g>
+            <g transform="translate(0 206)"><g class="bird b2"><path d="M-15 0 Q-7.5 -9 0 0 Q7.5 -9 15 0"/></g></g>
+            <g transform="translate(0 140)"><g class="bird b3"><path d="M-17 0 Q-8.5 -10 0 0 Q8.5 -10 17 0"/></g></g>
           </g>
-          <g class="sc-fore" fill="var(--pine)">
-            <use href="#pine" transform="translate(28 462) scale(2.1)"/>
-            <use href="#pine" transform="translate(1416 462) scale(2.4)"/>
+        </svg>
+
+        <svg class="badge" viewBox="0 0 200 200" aria-hidden="true">
+          <defs><path id="circle" d="M100,100 m-76,0 a76,76 0 1,1 152,0 a76,76 0 1,1 -152,0"/></defs>
+          <radialGradient id="g-sun"><stop offset=".45" stop-color="rgb(var(--sun-halo))" stop-opacity=".8"/><stop offset="1" stop-color="rgb(var(--sun-halo))" stop-opacity="0"/></radialGradient>
+          <circle class="halo" cx="100" cy="100" r="78" fill="url(#g-sun)"/>
+          <circle class="dot" cx="100" cy="100" r="34"/>
+          <g class="spin">
+            <text><textPath href="#circle" id="badge-text" textLength="470" lengthAdjust="spacing"></textPath></text>
           </g>
-        </g>
-      </svg>
-      <svg class="camp" viewBox="0 0 120 100" aria-hidden="true">
-        <path class="ground" d="M2 87 C24 84.5 58 89 118 86.5"/>
-      
-        <!-- ridge tent -->
-        <path class="t-back" d="M33 44 L43 40 L66 86 L56 86 Z"/>
-        <path class="t-body" d="M33 44 L10 86 L56 86 Z"/>
-        <path class="t-door" d="M33 50 L25 86 L41 86 Z"/>
-        <path class="guy" d="M10 86 L4 89"/>
-        <path class="guy" d="M56 86 L62 89"/>
-      
-        <!-- campfire -->
-        <path class="log" d="M79 87 L97 81"/>
-        <path class="log" d="M80 81 L98 87"/>
-        <path class="log" d="M85 88 L93 79"/>
-        <path class="fl fl-a" d="M88 64 C93 70 93 77 88 81 C83 77 83 70 88 64 Z"/>
-        <path class="fl fl-c" d="M84 71 C86 74 86 78 84 81 C82 78 82 74 84 71 Z"/>
-        <path class="fl fl-b" d="M88 69 C90.5 73 90.5 78 88 81 C85.5 78 85.5 73 88 69 Z"/>
-      
-        <!-- smoke -->
-        <circle class="puff puff-1" cx="89" cy="58" r="3"/>
-        <circle class="puff puff-2" cx="92" cy="50" r="2.5"/>
-        <circle class="puff puff-3" cx="88" cy="42" r="2"/>
-      </svg>
+        </svg>
+
+        <svg class="hero-scene" viewBox="0 0 1440 560" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+          <defs>
+            <g id="pn">
+              <path d="M0 -62 L12 -40 L6 -40 L19 -19 L9 -19 L25 4 L-25 4 L-9 -19 L-19 -19 L-6 -40 L-12 -40 Z"/>
+              <path fill="var(--lit)" d="M0 -62 L12 -40 L6 -40 L19 -19 L9 -19 L25 4 L0 4 Z"/>
+            </g>
+          </defs>
+          <g class="sc-far">
+            <path class="shade" d="M0 330 L90 270 L170 300 L280 190 L360 250 L430 215 L520 280 L600 230 L700 120 L790 220 L860 190 L960 260 L1060 170 L1150 240 L1230 205 L1330 270 L1440 230 L1440 560 L0 560 Z"/>
+            <path class="lit" d="M280 190 L360 250 L322 300 L296 258 Z M430 215 L520 280 L482 312 L446 270 Z M700 120 L790 220 L750 292 L716 210 Z M1060 170 L1150 240 L1110 302 L1076 240 Z M1230 205 L1330 270 L1290 302 L1246 260 Z"/>
+            <path class="cap" d="M700 120 L727 150 L714 146 L703 158 L692 147 L674 149 Z M280 190 L302 207 L292 205 L283 214 L272 204 L262 208 Z M1060 170 L1086 190 L1074 188 L1064 199 L1052 188 L1037 191 Z M430 215 L448 228 L440 227 L433 234 L425 227 L415 230 Z"/>
+          </g>
+          <g class="sc-mid">
+            <path d="M0 400 L120 340 L230 372 L340 318 L470 382 L590 330 L720 392 L840 336 L960 382 L1090 330 L1210 376 L1330 340 L1440 372 L1440 560 L0 560 Z"/>
+            <path class="lit" d="M340 318 L470 382 L420 400 L352 352 Z M840 336 L960 382 L912 398 L852 362 Z M1090 330 L1210 376 L1160 394 L1102 356 Z"/>
+          </g>
+          <g class="sc-near">
+            <path d="M0 470 C 160 432 300 452 460 442 C 640 430 760 462 940 446 C 1120 430 1260 452 1440 438 L1440 560 L0 560 Z"/>
+          </g>
+          <g class="sc-trees">
+            <use href="#pn" transform="translate(42 470) scale(.7)"/><use href="#pn" transform="translate(96 462) scale(.86)"/>
+            <use href="#pn" transform="translate(150 468) scale(.66)"/><use href="#pn" transform="translate(330 458) scale(.6)"/>
+            <use href="#pn" transform="translate(600 452) scale(.58)"/><use href="#pn" transform="translate(700 458) scale(.7)"/>
+            <use href="#pn" transform="translate(760 456) scale(.62)"/><use href="#pn" transform="translate(880 452) scale(.78)"/>
+            <use href="#pn" transform="translate(940 446) scale(.9)"/><use href="#pn" transform="translate(1000 450) scale(.72)"/>
+            <use href="#pn" transform="translate(1110 444) scale(.84)"/><use href="#pn" transform="translate(1170 450) scale(.7)"/>
+            <use href="#pn" transform="translate(1250 446) scale(.92)"/><use href="#pn" transform="translate(1320 452) scale(.76)"/>
+            <use href="#pn" transform="translate(1400 448) scale(.88)"/>
+          </g>
+          <g class="sc-fore">
+            <use href="#pn" transform="translate(20 552) scale(1.5)"/><use href="#pn" transform="translate(78 560) scale(1.15)"/>
+            <use href="#pn" transform="translate(196 556) scale(.95)"/><use href="#pn" transform="translate(470 560) scale(.8)"/>
+            <use href="#pn" transform="translate(820 556) scale(.9)"/><use href="#pn" transform="translate(1046 558) scale(1.05)"/>
+            <use href="#pn" transform="translate(1210 556) scale(1.2)"/><use href="#pn" transform="translate(1300 560) scale(.95)"/>
+            <use href="#pn" transform="translate(1380 554) scale(1.4)"/><use href="#pn" transform="translate(1432 560) scale(1.1)"/>
+          </g>
+        </svg>
+
+        <div class="meadow" aria-hidden="true">
+          <svg viewBox="0 0 1440 140" preserveAspectRatio="xMidYMin slice">
+            <defs><linearGradient id="g-meadow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--meadow-top)"/><stop offset=".7" stop-color="var(--meadow)"/></linearGradient></defs>
+            <path fill="url(#g-meadow)" d="M0 14 C200 -2 380 24 600 10 C820 -4 1040 22 1240 8 C1340 2 1400 10 1440 6 V140 H0 Z"/>
+            <g class="drift">
+              <ellipse cx="180" cy="40" rx="150" ry="9"/><ellipse cx="620" cy="70" rx="220" ry="11"/>
+              <ellipse cx="1080" cy="34" rx="180" ry="8"/><ellipse cx="1330" cy="92" rx="140" ry="9"/>
+            </g>
+            <g class="tufts">
+              <path d="M90 60 l4 -12 l3 12 l5 -9 l2 9"/><path d="M420 30 l3 -10 l3 10 l4 -8 l2 8"/>
+              <path d="M860 96 l4 -12 l3 12 l5 -9 l2 9"/><path d="M1190 58 l3 -10 l3 10 l4 -8 l2 8"/>
+              <path d="M300 110 l3 -9 l3 9 l4 -7 l2 7"/><path d="M1400 30 l3 -10 l3 10 l4 -8 l2 8"/>
+            </g>
+          </svg>
+        </div>
+
+        <svg class="camp-stage" viewBox="0 0 1000 600" role="img" aria-labelledby="camp-title">
+          <title id="camp-title">Cartoon of Simran at a mountain campsite in the afternoon, tending the campfire beside her tent</title>
+          <defs>
+            <clipPath id="cp-body"><path d="M0 0 H413 V495 L375 490 L364 465 L352 425 L340 375 L330 338 L300 338 L304 390 L308 430 L306 470 L306 505 L310 524 L134 524 L137 500 L139 470 L140 430 L142 380 L143 338 L104 338 L98 362 L88 394 L76 432 L66 462 L58 490 L55 512 L0 512 Z"/></clipPath>
+            <clipPath id="cp-arm-l"><path d="M104 338 L143 338 L142 380 L140 430 L139 470 L137 500 L134 520 L128 538 L110 546 L104 560 L104 600 L101 625 L94 639 L78 640 L63 630 L57 612 L58 585 L64 562 L68 542 L60 532 L55 512 L58 490 L66 462 L76 432 L88 394 L98 362 Z"/></clipPath>
+            <clipPath id="cp-arm-r"><path d="M300 338 L330 338 L340 375 L352 425 L364 465 L375 490 L380 520 L372 540 L377 555 L384 583 L383 612 L374 632 L358 640 L340 628 L336 600 L335 560 L322 540 L310 525 L306 505 L306 470 L308 430 L304 390 Z"/></clipPath>
+            <clipPath id="cp-leg-l"><path d="M132 505 L227 505 L227 600 L226 680 L224 800 L222 860 L214 902 L100 902 L104 860 L110 800 L114 700 L118 620 L120 560 L126 542 L132 538 Z"/></clipPath>
+            <clipPath id="cp-leg-r"><path d="M227 505 L313 505 L314 538 L324 542 L333 560 L334 620 L340 680 L352 760 L362 820 L374 860 L394 902 L268 902 L260 860 L240 760 L230 680 L227 600 Z"/></clipPath>
+            <clipPath id="cp-cap-l"><circle cx="122" cy="350" r="19"/></clipPath>
+            <clipPath id="cp-cap-r"><circle cx="318" cy="350" r="19"/></clipPath>
+            <linearGradient id="g-lid" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#c78a63"/><stop offset=".55" stop-color="#e8ad86"/><stop offset="1" stop-color="#f2b991"/>
+            </linearGradient>
+            <radialGradient id="g-firelight">
+              <stop offset="0" stop-color="rgb(var(--fire-light))" stop-opacity=".5"/>
+              <stop offset=".45" stop-color="rgb(var(--fire-light))" stop-opacity=".22"/>
+              <stop offset="1" stop-color="rgb(var(--fire-light))" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="g-glow">
+              <stop offset="0" stop-color="#ffd9a0" stop-opacity=".95"/>
+              <stop offset="1" stop-color="#ffd9a0" stop-opacity="0"/>
+            </radialGradient>
+            <g id="log">
+              <rect x="-46" y="-11" width="92" height="22" rx="11" fill="var(--bark)"/>
+              <ellipse cx="-40" cy="0" rx="7" ry="11" fill="var(--log-end)" stroke="var(--bark-dark)" stroke-width="3"/>
+            </g>
+          </defs>
+
+          <ellipse class="fire-light" cx="262" cy="540" rx="270" ry="70" fill="url(#g-firelight)"/>
+          <ellipse class="ground-shade" cx="722" cy="554" rx="200" ry="9"/>
+
+          <g class="bunting">
+            <path class="line" d="M965 404 V556"/>
+            <path class="line" d="M700 296 Q830 380 965 404"/>
+            <g class="flags">
+              <path class="f1" d="M730 320 L748 321 L739 341 Z"/><path class="f2" d="M770 341 L788 342 L779 362 Z"/>
+              <path class="f3" d="M809 359 L827 360 L818 380 Z"/><path class="f4" d="M849 375 L867 376 L858 396 Z"/>
+              <path class="f1" d="M889 388 L907 389 L898 409 Z"/><path class="f2" d="M929 398 L947 399 L938 419 Z"/>
+            </g>
+          </g>
+
+          <g class="tent">
+            <path class="guy" d="M700 300 L506 560 M772 292 L944 548"/>
+            <path class="side" d="M700 312 L772 302 L915 540 L862 552 Z"/>
+            <path class="front" d="M700 312 L540 552 L862 552 Z"/>
+            <path class="inside" d="M700 340 L652 552 L742 552 Z"/>
+            <ellipse class="tent-glow" cx="698" cy="522" rx="40" ry="34" fill="url(#g-glow)"/>
+            <path class="flap" d="M700 340 L742 552 L780 552 Q732 468 705 345 Z"/>
+            <path class="seam" d="M700 312 L540 552 M700 312 L862 552 M700 312 L772 302"/>
+            <path class="pole" d="M700 312 V286 M772 302 V280"/>
+          </g>
+
+          <g class="lantern">
+            <path class="post" d="M902 556 V470 Q902 456 916 456 H926"/>
+            <g class="swing">
+              <circle class="lamp-glow" cx="926" cy="494" r="34" fill="url(#g-glow)"/>
+              <path class="handle" d="M916 470 Q926 458 936 470"/>
+              <rect class="cap" x="914" y="470" width="24" height="7" rx="2"/>
+              <rect class="glass" x="917" y="477" width="18" height="26" rx="4"/>
+              <rect class="cap" x="913" y="503" width="26" height="6" rx="2"/>
+            </g>
+          </g>
+
+          <g class="woodpile">
+            <g class="wood"><use href="#log" transform="translate(498 546)"/><use href="#log" transform="translate(500 524)"/><use href="#log" transform="translate(496 502)"/><use href="#log" transform="translate(502 480)"/></g>
+          </g>
+
+          <g class="seat"><use href="#log" transform="translate(132 541) scale(1.35 1.25)"/></g>
+
+          <g class="backpack">
+            <path class="pack" d="M34 556 V500 Q34 482 52 482 H74 Q92 482 92 500 V556 Z"/>
+            <path class="flap-p" d="M38 500 Q38 486 54 486 H72 Q88 486 88 500 V512 H38 Z"/>
+            <path class="strap" d="M48 520 V548 M78 520 V548"/>
+            <rect class="roll" x="30" y="474" width="66" height="14" rx="7"/>
+          </g>
+
+          <g class="fire">
+            <g class="stones">
+              <ellipse cx="224" cy="545" rx="16" ry="10"/><ellipse cx="300" cy="545" rx="16" ry="10"/>
+              <ellipse cx="206" cy="555" rx="16" ry="10"/><ellipse cx="236" cy="562" rx="17" ry="10"/>
+              <ellipse cx="270" cy="563" rx="17" ry="10"/><ellipse cx="302" cy="560" rx="16" ry="10"/><ellipse cx="322" cy="552" rx="14" ry="9"/>
+            </g>
+            <rect class="firelog" x="220" y="532" width="86" height="14" rx="7" transform="rotate(-14 263 539)"/>
+            <rect class="firelog" x="220" y="532" width="86" height="14" rx="7" transform="rotate(14 263 539)"/>
+            <ellipse class="embers" cx="263" cy="540" rx="34" ry="7"/>
+            <g class="thrown"><use href="#log"/></g>
+            <g class="flames">
+              <path class="fl fl-1" d="M262 410 C300 452 312 494 296 524 C286 542 238 542 228 524 C212 494 226 452 262 410 Z"/>
+              <path class="fl fl-2" d="M234 450 C252 476 254 502 246 526 C230 522 222 500 234 450 Z"/>
+              <path class="fl fl-3" d="M264 440 C290 472 296 504 284 526 C276 538 248 538 242 526 C232 504 244 472 264 440 Z"/>
+              <path class="fl fl-4" d="M262 474 C278 494 280 514 272 530 C266 538 256 538 252 530 C246 514 250 494 262 474 Z"/>
+            </g>
+            <g class="sparks">
+              <circle cx="262" cy="470" r="2.6"/><circle cx="256" cy="476" r="2"/><circle cx="270" cy="468" r="2.2"/>
+              <circle cx="262" cy="480" r="1.8"/><circle cx="252" cy="470" r="2.2"/><circle cx="274" cy="478" r="1.8"/>
+            </g>
+            <g class="smoke"><circle cx="262" cy="392" r="10"/><circle cx="266" cy="380" r="8"/><circle cx="258" cy="386" r="9"/></g>
+          </g>
+
+          <ellipse class="simi-shadow" cx="380" cy="561" rx="54" ry="7"/>
+
+          <g class="simi" transform="translate(311 258.5) scale(.335)">
+            <g class="mover">
+              <path class="hairfill" d="M104 338 L143 338 L142 380 L140 430 L139 470 L136 500 L66 492 L66 462 L76 432 L88 394 L98 362 Z M300 338 L330 338 L340 375 L352 425 L362 462 L364 482 L310 500 L306 470 L308 430 L304 390 Z"/>
+              <path class="strands" d="M95 372 Q86 430 80 488 M112 360 Q106 425 102 494 M128 356 Q126 430 124 497 M318 360 Q322 430 324 494 M334 368 Q342 430 348 488"/>
+              <path class="cloth" d="M205 505 H250 V655 H205 Z M134 500 L128 520 L126 545 L134 548 Z M310 500 L322 515 L332 548 L314 548 Z"/>
+              <g class="leg-l"><image href="images/avatar.png" width="413" height="900" clip-path="url(#cp-leg-l)"/></g>
+              <g class="leg-r"><image href="images/avatar.png" width="413" height="900" clip-path="url(#cp-leg-r)"/></g>
+              <g class="body">
+                <image href="images/avatar.png" width="413" height="900" clip-path="url(#cp-body)"/>
+                <g class="lid">
+                  <path fill="url(#g-lid)" d="M164 171 Q194 150 233 189 L231 196 Q200 203 168 181 Z"/>
+                  <path class="lash" d="M160 172 L168 179 Q200 199 230 192"/>
+                </g>
+                <g class="lid">
+                  <path fill="url(#g-lid)" d="M265 197 Q296 152 331 186 L330 192 Q300 212 268 203 Z"/>
+                  <path class="lash" d="M268 199 Q300 210 329 191 L337 185"/>
+                </g>
+              </g>
+              <g class="arm-l">
+                <g class="p-stick">
+                  <path class="stick" d="M88 610 L-64 806"/>
+                  <ellipse class="mallow" cx="-60" cy="798" rx="20" ry="16" transform="rotate(-52 -60 798)"/>
+                  <ellipse class="mallow toast" cx="-60" cy="798" rx="20" ry="16" transform="rotate(-52 -60 798)"/>
+                </g>
+                <g class="p-log"><use href="#log" transform="translate(84 616) scale(2.3 2.2)"/></g>
+                <image href="images/avatar.png" width="413" height="900" clip-path="url(#cp-arm-l)"/>
+              </g>
+              <g class="arm-r">
+                <image href="images/avatar.png" width="413" height="900" clip-path="url(#cp-arm-r)"/>
+                <g class="p-mug" transform="translate(360 612) scale(1.3) translate(-360 -612)">
+                  <path class="steam" d="M346 572 q-8 -14 0 -28 q8 -14 0 -28"/>
+                  <path class="steam s2" d="M366 570 q-8 -14 0 -28 q8 -14 0 -28"/>
+                  <path class="mug-handle" d="M384 596 q20 0 20 18 q0 18 -20 18"/>
+                  <rect class="mug" x="334" y="584" width="52" height="58" rx="8"/>
+                  <ellipse class="mug-rim" cx="360" cy="586" rx="26" ry="6"/>
+                </g>
+              </g>
+              <image href="images/avatar.png" width="413" height="900" clip-path="url(#cp-cap-l)"/>
+              <image href="images/avatar.png" width="413" height="900" clip-path="url(#cp-cap-r)"/>
+            </g>
+          </g>
+
+        </svg>
+
+        <div class="hero-text">
+          <h1 id="name" aria-live="off"></h1>
+          <p id="tagline" class="tagline"></p>
+          <a class="cta" href="#projects">See my projects</a>
+        </div>
+      </section>
+
+      <section class="portrait" id="portrait">
+        <svg class="trail-pines" viewBox="0 0 1440 220" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+          <path class="mound" d="M0 204 C240 178 420 200 720 192 C1000 184 1200 202 1440 186 V220 H0 Z"/>
+          <use href="#pn" transform="translate(40 220) scale(2.4)"/><use href="#pn" transform="translate(130 220) scale(1.7)"/>
+          <use href="#pn" transform="translate(210 220) scale(1.2)"/><use href="#pn" transform="translate(1250 220) scale(1.3)"/>
+          <use href="#pn" transform="translate(1330 220) scale(1.9)"/><use href="#pn" transform="translate(1410 220) scale(2.5)"/>
+        </svg>
+        <figure class="photo">
+          <img src="images/photo.png" width="800" height="1200" loading="lazy" decoding="async" alt="Portrait photo of a smiling woman with wavy dark red hair, wearing a black polka-dot blouse and black trousers">
+        </figure>
+      </section>
+
       <div class="ground" aria-hidden="true">
         <svg class="trek-trail" viewBox="0 0 520 90" aria-hidden="true" focusable="false">
           <defs>
@@ -181,30 +351,6 @@
         </svg>
       </div>
       <canvas class="snow" id="snow" aria-hidden="true"></canvas>
-    <section class="hero">
-      <div class="hero-text">
-        <h1 id="name" aria-live="off"></h1>
-        <p id="tagline" class="tagline"></p>
-        <a class="cta" href="#projects">See my projects</a>
-      </div>
-
-      <div class="hero-art">
-        <img class="avatar" src="images/avatar.png" width="413" height="900" fetchpriority="high" alt="Cartoon illustration of a smiling woman with long dark hair, a black jacket and sunglasses on her head">
-        <svg class="badge" viewBox="0 0 200 200" aria-hidden="true">
-          <defs><path id="circle" d="M100,100 m-76,0 a76,76 0 1,1 152,0 a76,76 0 1,1 -152,0"/></defs>
-          <g class="spin">
-            <text><textPath href="#circle" id="badge-text" textLength="470" lengthAdjust="spacing"></textPath></text>
-          </g>
-          <circle class="dot" cx="100" cy="100" r="22"/>
-        </svg>
-      </div>
-    </section>
-
-      <section class="portrait" id="portrait">
-        <figure class="photo">
-          <img src="images/photo.png" width="800" height="1200" loading="lazy" decoding="async" alt="Portrait photo of a smiling woman with wavy dark red hair, wearing a black polka-dot blouse and black trousers">
-        </figure>
-      </section>
     </div>
 
     <section id="about" class="block">

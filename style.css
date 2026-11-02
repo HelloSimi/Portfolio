@@ -26,6 +26,59 @@
   --ember: #f4b183;
   --ember-2: #ea8f5c;
 
+  /* the afternoon camp: sky, ridges, forest, meadow, tent and fire */
+  --sky-1: #c4dbef;
+  --sky-2: #e4e2f4;
+  --sky-3: #fbe4d2;
+  --sun: #fff3dc;
+  --sun-halo: 255, 214, 166;
+  --cloud: #ffffff;
+  --cloud-o: 0.85;
+  --star-o: 0;
+  --bird: #6a6380;
+  --bird-o: 1;
+  --peak-shade: #d3d6ec;
+  --peak-lit: #f3dfd6;
+  --snowcap: #ffffff;
+  --drift-o: 0.75;
+  --range: #ddd0e6;
+  --range-lit: #ead7df;
+  --hill: #cfdcd2;
+  --forest-back: #a7c0ae;
+  --forest-back-lit: #bdd0bf;
+  --forest: #7f9e8a;
+  --forest-lit: #97b49f;
+  --meadow-top: #eef0e4;
+  --meadow: #f6f3ec;
+  --tent: #e7c3cc;
+  --tent-shade: #cfa6b6;
+  --tent-flap: #f2d6dc;
+  --tent-in: #4b3447;
+  --tent-line: #8e6476;
+  --bark: #8b5e41;
+  --bark-dark: #5f3d2a;
+  --log-end: #ecc89c;
+  --stone: #bdb7c6;
+  --stone-2: #a59fb2;
+  --flame-1: #f2925a;
+  --flame-2: #f9c27b;
+  --flame-3: #fff1c7;
+  --spark: #ffd27a;
+  --fire-light: 255, 178, 110;
+  --fire-light-o: 0.5;
+  --lamp: #ffe2a8;
+  --steel: #6d7383;
+  --pack: #8a9ac0;
+  --pack-2: #6e7fa6;
+  --flag-1: #e7a3b6;
+  --flag-2: #b8a5e0;
+  --flag-3: #9cc5de;
+  --flag-4: #f2c48e;
+  --mug: #7aa3c6;
+  --steam: #ffffff;
+  --ground-shadow: rgba(60, 40, 60, 0.2);
+  --header-h: 70px;
+
   /* spacing scale */
   --s1: 4px;
   --s2: 8px;
@@ -75,6 +128,50 @@
   --dawn: #3a2f44;
   --ember: #f0a868;
   --ember-2: #e2894f;
+  /* night at the camp: the fire and lanterns carry the light */
+  --sky-1: #17142a;
+  --sky-2: #2b2342;
+  --sky-3: #4d3550;
+  --sun: #f1ead8;
+  --sun-halo: 210, 200, 240;
+  --cloud: #3a3352;
+  --cloud-o: 0.55;
+  --star-o: 0.9;
+  --bird-o: 0;
+  --peak-shade: #353049;
+  --peak-lit: #4a4360;
+  --snowcap: #c9cde2;
+  --drift-o: 0.12;
+  --range: #2c2840;
+  --range-lit: #363049;
+  --hill: #232a2c;
+  --forest-back: #2c3a34;
+  --forest-back-lit: #34443c;
+  --forest: #1f2b26;
+  --forest-lit: #26352e;
+  --meadow-top: #262330;
+  --meadow: #241f2e;
+  --tent: #6e4f60;
+  --tent-shade: #573f4f;
+  --tent-flap: #7e5d6e;
+  --tent-in: #2a1a26;
+  --tent-line: #3d2a36;
+  --bark: #6b4733;
+  --bark-dark: #3f2a1e;
+  --log-end: #b08c66;
+  --stone: #57526a;
+  --stone-2: #4a4559;
+  --fire-light: 255, 160, 90;
+  --fire-light-o: 0.7;
+  --pack: #4f5a78;
+  --pack-2: #3f4862;
+  --flag-1: #a86a7e;
+  --flag-2: #7d6aa8;
+  --flag-3: #5f8aa3;
+  --flag-4: #b08452;
+  --mug: #5d85a8;
+  --steam: #c9cde2;
+  --ground-shadow: rgba(0, 0, 0, 0.35);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 10px 28px rgba(0, 0, 0, 0.25);
   --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.25), 0 18px 40px rgba(0, 0, 0, 0.32);
 }
@@ -229,39 +326,11 @@ main:focus { outline: none; }
   transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, fill 0.35s ease, stroke 0.35s ease !important;
 }
 
-/* the illustrated band: the hero and the portrait share one continuous scene */
-.scene-band {
-  --ground: clamp(72px, 11vh, 118px);
-  position: relative;
-  isolation: isolate;
-  overflow: clip;
-  background: linear-gradient(180deg, var(--dawn) 0%, var(--bg-2) 18%, var(--bg) 52%);
-}
-.scene-band > section { position: relative; z-index: 1; }
-.scene, .snow, .camp { position: absolute; pointer-events: none; }
-.snow { inset: 0; z-index: 0; width: 100%; height: 100%; }
-/* the ridges stand on the ground line; everything below it is open valley floor */
-.scene { left: 0; right: 0; bottom: var(--ground); z-index: 0; width: 100%; height: auto; }
-.sky { position: absolute; top: 0; left: 0; z-index: 0; width: 100%; height: clamp(180px, 34vh, 320px); pointer-events: none; }
-.ground { position: absolute; left: 0; right: 0; bottom: 0; z-index: 0; height: var(--ground); pointer-events: none; }
-
-/* hero */
-.hero {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: clamp(var(--s3), 4vw, var(--s6));
-  min-height: 46vh;
-  padding: clamp(var(--s5), 7vh, var(--s7)) var(--gutter) clamp(var(--s5), 6vh, var(--s6));
-}
-.hero > * { position: relative; z-index: 1; }
-
 #name {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(2.9rem, 8.4vw, 7.6rem);
+  font-size: clamp(2.9rem, 7.2vw, 7rem);
   line-height: 1.02;
   letter-spacing: -0.035em;
   overflow-wrap: anywhere;
@@ -297,31 +366,6 @@ main:focus { outline: none; }
 .cta:hover, .cta:focus-visible { box-shadow: var(--shadow-lift); }
 .js .cta { animation: rise var(--t-med) 1.05s var(--ease) both; }
 
-/* avatar and portrait are shown plain: no filter, border, shadow or overlay */
-.hero-art { position: relative; justify-self: center; translate: var(--px, 0) var(--py, 0); transition: translate 0.6s var(--ease); }
-.avatar { display: block; height: clamp(300px, 56vh, 540px); width: auto; }
-.js .avatar { animation: pop-in 0.9s 0.5s var(--ease) both, float var(--float) 1.4s ease-in-out infinite; }
-.badge {
-  position: absolute;
-  top: 2%;
-  left: -56%;
-  width: clamp(96px, 10vw, 132px);
-  height: auto;
-  overflow: visible;
-}
-.badge text {
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.1em;
-  fill: var(--text-soft);
-}
-.badge .dot { fill: var(--blush); }
-.badge .spin { transform-origin: 100px 100px; animation: spin 30s linear infinite; }
-.paused .avatar, .paused .badge .spin { animation-play-state: paused; }
-
-@keyframes pop-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
-@keyframes float { 50% { transform: translateY(-8px); } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes wobble {
   0%   { transform: none; }
@@ -362,8 +406,6 @@ main:focus { outline: none; }
   align-items: start;
 }
 .about-wrap.has-photo { grid-template-columns: minmax(180px, 280px) minmax(0, var(--measure)); }
-/* -7px closes the transparent margin under the cut-out so she stands on the line */
-.portrait { display: flex; justify-content: center; padding: 0 var(--gutter) calc(var(--ground) - 7px); }
 .portrait .photo { width: min(100%, 290px); }
 .photo { margin: 0; }
 .photo img { display: block; width: 100%; height: auto; }
@@ -504,10 +546,6 @@ main:focus { outline: none; }
 .notfound p.lead { max-width: 40ch; margin: var(--s4) 0 0; color: var(--text-soft); }
 
 @media (max-width: 760px) {
-  .hero { grid-template-columns: 1fr; min-height: 0; }
-  .hero-art { order: -1; margin-left: 70px; }
-  .avatar { height: 290px; }
-  .badge { left: -78%; width: 104px; }
   .block { grid-template-columns: 1fr; gap: var(--s3); }
   .about-wrap, .about-wrap.has-photo { grid-template-columns: 1fr; }
   .portrait .photo { max-width: 260px; }
@@ -542,16 +580,15 @@ main:focus { outline: none; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .js #name .ch, .js .tagline, .js .cta, .js .avatar { animation: none; opacity: 1; }
+  .js #name .ch, .js .tagline, .js .cta { animation: none; opacity: 1; }
   .badge .spin, .skel::after, .e-pulse { animation: none; }
   .js .rv { opacity: 1; transform: none; transition: none; }
   .js .repos.go .repo:not(.skel) { animation: none; }
-  .repos, .repo, .repo:hover, .hero-art, .hiker { transform: none; transition: none; }
+  .repos, .repo, .repo:hover, .hiker { transform: none; transition: none; }
   .theme-fade, .theme-fade *, .theme-fade *::before, .theme-fade *::after { transition: none !important; }
 }
 
 /* the scene layers drift at different rates as the band scrolls (JS sets --sy) */
-.scene g, .scene rect { transition: transform 0.25s linear; }
 .sc-stars { transform: translateY(calc(var(--sy, 0) * 26px)); }
 .sc-sky   { transform: translateY(calc(var(--sy, 0) * 24px)); }
 .sc-far   { transform: translateY(calc(var(--sy, 0) * 20px)); }
@@ -559,88 +596,6 @@ main:focus { outline: none; }
 .sc-near  { transform: translateY(calc(var(--sy, 0) * 7px)); }
 .sc-trees { transform: translateY(calc(var(--sy, 0) * 2px)); }
 
-/* camp corner: small cosy camp in the lower-left of the hero scene */
-.scene-band > .camp {
-  position: absolute;
-  z-index: 0;                 /* behind the z-index:1 sections of the band */
-  right: clamp(16px, 17vw, 310px);   /* the hero button is always on the left */
-  bottom: calc(var(--ground) - 6px);
-  width: clamp(150px, 15vw, 205px);
-  height: auto;
-  pointer-events: none;
-}
-
-/* one line style everywhere */
-.camp path, .camp circle {
-  fill: none;
-  stroke-width: 1.6;
-  vector-effect: non-scaling-stroke;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.camp .ground { stroke: var(--pine-2); }
-.camp .guy { stroke: var(--text-soft); stroke-opacity: .45; }
-.camp .log { stroke: var(--pine); }
-.camp .t-body { fill: var(--lavender); stroke: var(--text-soft); stroke-opacity: .5; }
-.camp .t-back { fill: var(--ice); stroke: var(--text-soft); stroke-opacity: .5; }
-.camp .t-door { fill: var(--pine-2); stroke: var(--text-soft); stroke-opacity: .5; }
-
-/* flames: filled, no stroke; warm tones live only here */
-.camp .fl { stroke: none; transform-box: fill-box; transform-origin: bottom center; }
-.camp .fl-a, .camp .fl-c { fill: var(--ember); }
-.camp .fl-b { fill: var(--ember-2); }
-.camp .fl-a { animation: camp-flick-a 1.4s ease-in-out infinite; }
-.camp .fl-b { animation: camp-flick-b 1.1s ease-in-out 0.2s infinite; }
-.camp .fl-c { animation: camp-flick-c 1.7s ease-in-out 0.5s infinite; }
-
-@keyframes camp-flick-a {
-  0%, 100% { transform: scale(1, 1) translateX(0); }
-  30%      { transform: scale(0.9, 1.12) translateX(-4%); }
-  65%      { transform: scale(1.07, 0.93) translateX(3%); }
-}
-@keyframes camp-flick-b {
-  0%, 100% { transform: scale(1, 1); opacity: 1; }
-  40%      { transform: scale(0.86, 1.16) translateX(4%); opacity: 0.92; }
-  75%      { transform: scale(1.08, 0.9); opacity: 1; }
-}
-@keyframes camp-flick-c {
-  0%, 100% { transform: scale(1, 1) translateX(0); opacity: 0.9; }
-  45%      { transform: scale(1.1, 0.88) translateX(-3%); opacity: 0.7; }
-  80%      { transform: scale(0.92, 1.1) translateX(2%); opacity: 1; }
-}
-
-/* smoke: faint puffs that rise and fade in their own lane */
-.camp .puff {
-  fill: var(--line-strong);
-  stroke: none;
-  opacity: 0.28;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: camp-smoke 7s linear infinite;
-}
-.camp .puff-2 { animation-duration: 8s; animation-delay: 2.4s; }
-.camp .puff-3 { animation-duration: 9s; animation-delay: 4.6s; }
-
-@keyframes camp-smoke {
-  0%   { transform: translate(0, 0) scale(0.7); opacity: 0; }
-  20%  { opacity: 0.3; }
-  70%  { opacity: 0.2; }
-  100% { transform: translate(-3px, -26px) scale(1.35); opacity: 0; }
-}
-
-/* pause off-screen / hidden tab */
-.paused .camp .fl, .paused .camp .puff,
-.band-rest .camp .fl, .band-rest .camp .puff { animation-play-state: paused; }
-
-/* narrow screens: shrink; 760px is where the hero itself restacks */
-@media (max-width: 760px) {
-  .scene-band > .camp { width: clamp(104px, 26vw, 150px); right: 10px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* flames settle to their static shapes, puffs stay as a faint still curl */
-  .camp .fl, .camp .puff { animation: none; transform: none; }
-}
 /* ---- section seams: shallow ridge + pine dividers --------------------------
    Both share one 0 0 1440 48 box and one band path, so they read as a family.
    The band is a thin ribbon floating in the page background rather than a mass
@@ -746,13 +701,273 @@ main:focus { outline: none; }
 .foot .compass .cp-needle { fill: var(--accent-2); stroke: none; }
 .foot .compass .cp-hub { fill: var(--surface); stroke: var(--line-strong); }
 
-@media (max-width: 680px) {
-  /* the range keeps its presence on a narrow screen instead of shrinking away */
-  .scene { height: clamp(170px, 26vh, 240px); }
-}
 
 /* the pine seam keeps its aspect so the firs stay firs */
 .divider .seam-pine { height: auto; }
 @media (max-width: 560px) {
   .divider .seam-pine .seam-pines { display: none; }
+}
+
+/* ---- the afternoon camp: sky, ridges, forest, meadow and the camp itself ---- */
+.scene-band {
+  --ground: clamp(72px, 11vh, 118px);
+  --meadow-h: clamp(92px, 14vh, 140px);
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background: linear-gradient(180deg, var(--meadow) 0%, var(--meadow) 55%, var(--bg) 100%);
+}
+.snow { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; pointer-events: none; }
+.ground { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; height: var(--ground); pointer-events: none; }
+
+/* hero: the header floats over the sky, so the sky starts behind it */
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  min-height: max(660px, 96vh);
+  margin-top: calc(var(--header-h) * -1);
+  padding: calc(var(--header-h) + clamp(36px, 14vh, 150px)) var(--gutter) 0;
+  overflow: clip;
+  background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 46%, var(--sky-3) 82%);
+}
+.hero-text { position: relative; z-index: 3; max-width: min(48rem, 60%); }
+.sky-art { position: absolute; top: 0; left: 0; z-index: 0; width: 100%; height: 72%; pointer-events: none; }
+.hero-scene {
+  position: absolute;
+  left: 0;
+  bottom: calc(var(--meadow-h) - 2px);
+  z-index: 0;
+  width: 100%;
+  height: clamp(300px, 52vh, 540px);
+  pointer-events: none;
+}
+.meadow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  height: calc(var(--meadow-h) + 12px);
+}
+.meadow svg { display: block; width: 100%; height: 100%; }
+.camp-stage {
+  position: absolute;
+  z-index: 1;
+  right: clamp(0px, 2vw, 40px);
+  bottom: calc(var(--meadow-h) * 0.32);
+  width: min(64vw, 1000px);
+  height: auto;
+  overflow: visible;
+}
+
+/* the sun carries the badge text around it */
+.badge {
+  position: absolute;
+  z-index: 0;
+  top: calc(var(--header-h) + clamp(16px, 6vh, 64px));
+  right: clamp(28px, 30vw, 540px);
+  width: clamp(120px, 12vw, 186px);
+  height: auto;
+  overflow: visible;
+  pointer-events: none;
+}
+.badge text { font-family: var(--font-body); font-weight: 700; font-size: 15px; letter-spacing: 0.1em; fill: var(--text-soft); }
+.badge .dot { fill: var(--sun); }
+.badge .halo { opacity: 0.9; transform-box: fill-box; transform-origin: center; animation: halo 7s ease-in-out infinite; }
+.badge .spin { transform-origin: 100px 100px; animation: spin 40s linear infinite; }
+
+/* sky */
+.sc-stars circle { fill: var(--snowcap); opacity: var(--star-o); }
+.cloud { fill: var(--cloud); opacity: var(--cloud-o); animation: drift 90s ease-in-out infinite alternate; }
+.c2 { animation-duration: 120s; animation-delay: -40s; }
+.c3 { animation-duration: 100s; animation-delay: -70s; }
+.bird { opacity: var(--bird-o); animation: fly 36s linear infinite; }
+.b2 { animation-duration: 44s; animation-delay: -14s; }
+.b3 { animation-duration: 40s; animation-delay: -27s; }
+.bird path { fill: none; stroke: var(--bird); stroke-width: 2.2; stroke-linecap: round; transform-box: fill-box; transform-origin: 50% 100%; animation: flap 0.5s ease-in-out infinite alternate; }
+
+/* ridges and forest; --lit paints the sunward half of each pine */
+.sc-far .shade { fill: var(--peak-shade); }
+.sc-far .lit { fill: var(--peak-lit); }
+.sc-far .cap { fill: var(--snowcap); }
+.sc-mid path { fill: var(--range); }
+.sc-mid .lit { fill: var(--range-lit); }
+.sc-near path { fill: var(--hill); }
+.sc-trees { fill: var(--forest-back); --lit: var(--forest-back-lit); }
+.sc-fore { fill: var(--forest); --lit: var(--forest-lit); }
+.hero-scene g { transition: transform 0.25s linear; }
+
+/* meadow */
+.drift ellipse { fill: var(--snowcap); opacity: var(--drift-o); }
+.trail-pines .mound { fill: var(--meadow-top); }
+.tufts path { fill: none; stroke: var(--forest-back); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* camp props */
+.fire-light { opacity: var(--fire-light-o); transform-box: fill-box; transform-origin: center; animation: firelight 2.4s ease-in-out infinite; }
+.ground-shade { fill: var(--ground-shadow); opacity: 0.5; }
+.simi-shadow { fill: var(--ground-shadow); }
+.bunting .line { fill: none; stroke: var(--tent-line); stroke-width: 1.6; opacity: 0.7; }
+.flags { transform-box: view-box; transform-origin: 700px 296px; animation: bunt 6s ease-in-out infinite; }
+.f1 { fill: var(--flag-1); }
+.f2 { fill: var(--flag-2); }
+.f3 { fill: var(--flag-3); }
+.f4 { fill: var(--flag-4); }
+.tent .front { fill: var(--tent); }
+.tent .side { fill: var(--tent-shade); }
+.tent .inside { fill: var(--tent-in); }
+.tent .flap { fill: var(--tent-flap); }
+.tent .seam, .tent .guy { fill: none; stroke: var(--tent-line); stroke-width: 2; stroke-linecap: round; }
+.tent .guy { stroke-width: 1.4; opacity: 0.55; }
+.tent .pole { fill: none; stroke: var(--bark-dark); stroke-width: 4; stroke-linecap: round; }
+.tent-glow { opacity: 0.55; animation: glow 3.4s ease-in-out infinite; }
+.lantern .post { fill: none; stroke: var(--bark-dark); stroke-width: 4; stroke-linecap: round; }
+.lantern .swing { transform-box: view-box; transform-origin: 926px 458px; animation: swing 4.2s ease-in-out infinite; }
+.lantern .handle { fill: none; stroke: var(--steel); stroke-width: 2.4; }
+.lantern .cap { fill: var(--steel); }
+.lantern .glass { fill: var(--lamp); }
+.lamp-glow { opacity: 0.6; animation: glow 2.8s ease-in-out infinite; }
+.backpack .pack { fill: var(--pack); }
+.backpack .flap-p { fill: var(--pack-2); }
+.backpack .strap { fill: none; stroke: var(--pack-2); stroke-width: 4; stroke-linecap: round; }
+.backpack .roll { fill: var(--flag-1); }
+.stones ellipse { fill: var(--stone); }
+.stones ellipse:nth-child(odd) { fill: var(--stone-2); }
+.firelog { fill: var(--bark); }
+.embers { fill: var(--ember-2); opacity: 0.85; transform-box: fill-box; transform-origin: center; animation: embers 1.7s ease-in-out infinite; }
+@keyframes embers { 50% { opacity: 0.6; transform: scaleX(1.06); } }
+
+/* fire: four tongues flicker out of step; .flare is added by script.js when a log goes on */
+.flames { transform-box: view-box; transform-origin: 263px 540px; transition: transform 0.5s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.fire.flare .flames { transform: scale(1.32); }
+.fl { transform-box: fill-box; transform-origin: 50% 100%; }
+.fl-1 { fill: var(--flame-1); animation: flick-a 1.3s ease-in-out infinite; }
+.fl-2 { fill: var(--flame-1); animation: flick-b 1.05s ease-in-out 0.2s infinite; }
+.fl-3 { fill: var(--flame-2); animation: flick-c 1.6s ease-in-out 0.4s infinite; }
+.fl-4 { fill: var(--flame-3); animation: flick-a 0.9s ease-in-out 0.1s infinite; }
+.sparks circle { fill: var(--spark); opacity: 0; transform-box: fill-box; animation: spark 2.2s ease-out infinite; }
+.sparks circle:nth-child(2) { --dx: -16px; animation-duration: 2.6s; animation-delay: 0.5s; }
+.sparks circle:nth-child(3) { --dx: 14px; animation-duration: 1.9s; animation-delay: 0.9s; }
+.sparks circle:nth-child(4) { --dx: -6px; animation-duration: 2.4s; animation-delay: 1.3s; }
+.sparks circle:nth-child(5) { --dx: -22px; animation-duration: 2.8s; animation-delay: 1.7s; }
+.sparks circle:nth-child(6) { --dx: 20px; animation-duration: 2.1s; animation-delay: 0.2s; }
+.fire.flare .sparks circle { animation-duration: 0.9s; }
+.smoke circle { fill: var(--stone); opacity: 0; transform-box: fill-box; transform-origin: center; animation: smoke 7s linear infinite; }
+.smoke circle:nth-child(2) { animation-delay: 2.3s; animation-duration: 8s; }
+.smoke circle:nth-child(3) { animation-delay: 4.6s; animation-duration: 9s; }
+
+/* the character: her own avatar art cut into pieces at the shoulders and hips, so her face is never redrawn */
+.simi .hairfill { fill: #3a2e24; }
+.simi .strands { fill: none; stroke: #5a4837; stroke-width: 2; stroke-linecap: round; }
+.simi .cloth { fill: #272521; }
+.simi .lid { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); }
+.simi .lash { fill: none; stroke: #2a1a13; stroke-width: 3.2; stroke-linecap: round; }
+.p-stick, .p-log, .p-mug, .thrown { opacity: 0; }
+.stick { fill: none; stroke: var(--bark); stroke-width: 7; stroke-linecap: round; }
+.mallow { fill: #fffaf2; stroke: #e6d6c4; stroke-width: 3; }
+.mallow.toast { fill: #e3a464; stroke: #b9773e; opacity: 0; }
+.mug { fill: var(--mug); }
+.mug-rim { fill: #f4f2f8; stroke: var(--mug); stroke-width: 3; }
+.mug-handle { fill: none; stroke: var(--mug); stroke-width: 7; }
+.steam { fill: none; stroke: var(--steam); stroke-width: 4; stroke-linecap: round; opacity: 0; transform-box: fill-box; animation: steam 2.6s ease-in-out infinite; }
+.steam.s2 { animation-delay: 1.3s; }
+
+/* the portrait stands a little way down the trail from the camp */
+.scene-band > .portrait {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  padding: clamp(24px, 6vh, 64px) var(--gutter) calc(var(--ground) - 7px);
+}
+.trail-pines {
+  position: absolute;
+  left: 0;
+  bottom: calc(var(--ground) - 4px);
+  z-index: -1;
+  width: 100%;
+  height: clamp(120px, 22vh, 230px);
+  fill: var(--forest);
+  --lit: var(--forest-lit);
+  pointer-events: none;
+}
+
+/* the 404 page has no header to tuck under, and no camp below it */
+.hero.notfound { margin-top: 0; min-height: 100vh; align-content: center; padding: var(--s6) var(--gutter); }
+
+/* the header is see-through while it sits over the sky */
+.top { transition: background-color 0.3s ease; }
+.top.on-sky { background: transparent; }
+
+/* everything in the band rests while it is off screen or the tab is hidden */
+.paused .scene-band *, .scene-band.band-rest * { animation-play-state: paused !important; }
+
+@keyframes halo { 50% { transform: scale(1.1); opacity: 0.6; } }
+@keyframes drift { to { transform: translateX(140px); } }
+@keyframes fly { from { transform: translateX(-80px); } to { transform: translateX(1540px); } }
+@keyframes flap { to { transform: scaleY(0.25); } }
+@keyframes firelight { 50% { transform: scale(1.06, 1.1); opacity: calc(var(--fire-light-o) * 0.75); } }
+@keyframes bunt { 50% { transform: rotate(1.2deg); } }
+@keyframes glow { 50% { opacity: 0.32; } }
+@keyframes swing { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes flick-a {
+  0%, 100% { transform: scale(1, 1) skewX(0deg); }
+  25% { transform: scale(0.93, 1.09) skewX(-3deg); }
+  50% { transform: scale(1.05, 0.95) skewX(2deg); }
+  75% { transform: scale(0.97, 1.05) skewX(-1deg); }
+}
+@keyframes flick-b {
+  0%, 100% { transform: scale(1, 1) skewX(0deg); opacity: 1; }
+  40% { transform: scale(0.86, 1.16) skewX(4deg); opacity: 0.9; }
+  70% { transform: scale(1.06, 0.9) skewX(-2deg); }
+}
+@keyframes flick-c {
+  0%, 100% { transform: scale(1, 1) skewX(0deg); }
+  30% { transform: scale(1.06, 0.92) skewX(2deg); }
+  60% { transform: scale(0.92, 1.12) skewX(-3deg); }
+}
+@keyframes spark {
+  0% { transform: translate(0, 0); opacity: 0; }
+  12% { opacity: 1; }
+  100% { transform: translate(var(--dx, 8px), -150px); opacity: 0; }
+}
+@keyframes smoke {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  20% { opacity: 0.32; }
+  100% { transform: translate(-18px, -120px) scale(2.2); opacity: 0; }
+}
+@keyframes steam {
+  0% { transform: translateY(6px); opacity: 0; }
+  40% { opacity: 0.8; }
+  100% { transform: translateY(-22px); opacity: 0; }
+}
+
+@media (max-width: 760px) {
+  .hero {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: calc(var(--header-h) + 28px) var(--gutter) 0;
+  }
+  .hero-text { order: 1; max-width: none; }
+  .camp-stage {
+    position: relative;
+    order: 2;
+    right: auto;
+    bottom: auto;
+    width: 136%;
+    margin: var(--s3) -18% calc(var(--meadow-h) * 0.3);
+  }
+  .hero-scene { height: clamp(240px, 46vh, 360px); }
+  .badge { top: calc(var(--header-h) + 2px); right: 6px; width: 72px; }
+  .badge text { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cloud, .bird, .bird path, .fl, .fire-light, .embers, .tent-glow, .lamp-glow, .lantern .swing,
+  .flags, .badge .halo, .badge .spin { animation: none; }
+  .sparks, .smoke, .bird { display: none; }
+  .steam { animation: none; opacity: 0.5; }
+  .hero-scene g { transition: none; }
 }
