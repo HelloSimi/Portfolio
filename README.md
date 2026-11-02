@@ -1,14 +1,22 @@
 # Simran Rekhi – portfolio
 
-A static portfolio site: plain HTML, CSS and JavaScript, no build step.
+A small personal website: plain HTML, CSS and JavaScript. No build step, nothing to install.
 
-## Make it yours
+## Change the text and links
 
-Open `script.js` and edit the `CONFIG` block at the top: tagline, about text, skills and links. Nothing else needs changing. The project list loads public repositories from the GitHub account in `githubUser`.
+Open `script.js`. The block at the very top, called `CONFIG`, is the only part you need to edit. Change a value, save, and refresh the page.
+
+- `name`: your name, shown big at the top.
+- `tagline`, `about`, `skills`, `contactText`: the texts for each section.
+- `links`: the buttons in the Contact section. Add a line for each one, for example email or LinkedIn (examples are in the file, just remove the `//`).
+- `githubUser`: your GitHub username. Your public repositories are listed as projects automatically.
+- `badge`: the short text that circles around the avatar.
+
+Keep the quotes and commas as they are in the file. If the page goes blank, a quote or comma was probably removed.
 
 ## Show or hide sections
 
-In the `CONFIG` block, `sections` has one switch for each part of the page: `tagline`, `about`, `skills`, `projects` and `contact`. Set a switch to `true` to show that part and `false` to hide it. A hidden part disappears completely, including its link in the top menu, and the page spacing adjusts by itself. Your text stays in `CONFIG`, so you can turn a part on later by changing one word.
+`sections` has one switch for each part of the page: `tagline`, `about`, `skills`, `projects` and `contact`. Set a switch to `true` to show that part and `false` to hide it. A hidden part disappears completely, including its link in the top menu, and the page spacing adjusts by itself. Your text stays in `CONFIG`, so you can turn a part on later by changing one word.
 
 The portrait photo has its own switch, `photo`. It can stay on even when the About text is off, and it is then shown as a framed portrait under the intro.
 
@@ -23,14 +31,30 @@ Projects are loaded from your public GitHub repositories and kept for ten minute
 
 Both are empty by default. Forks that are not pinned stay hidden. When your repositories use two or more languages, filter buttons appear above the list.
 
-## Run locally
+## Light and dark theme
 
-Open `index.html` in a browser, or serve the folder:
+The site follows the visitor's device setting. The round button in the top corner switches between light and dark, and the choice is remembered in that browser. To change the colours, edit the variables at the top of `style.css` (`:root` for dark, `:root[data-theme="light"]` for light).
+
+The page also sets its title and sharing text from `CONFIG`: the tagline when it is shown, otherwise a short line with your name.
+
+## Run it on your computer
+
+Open `index.html` in a browser. Or serve the folder, which behaves more like the real site:
 
 ```
 python -m http.server 8000
 ```
 
+Then visit http://localhost:8000.
+
 ## Publish with GitHub Pages
 
-Repository → Settings → Pages → Deploy from a branch → `main` / root → Save.
+Repository → Settings → Pages → Deploy from a branch → `main` / root → Save. After a minute the site is live at `https://<your-username>.github.io/<repository-name>/`. A missing page shows `404.html`.
+
+## Files
+
+- `index.html`: the page structure.
+- `style.css`: colours, fonts and layout.
+- `script.js`: your `CONFIG` plus the page behaviour.
+- `404.html`: the "page not found" page.
+- `images/`: the avatar and the portrait photo. Replace a file with another of the same name to change it.

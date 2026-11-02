@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page not found</title>
+  <meta name="robots" content="noindex">
+  <meta name="color-scheme" content="dark light">
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      /* this page can be served from any depth, so point relative links at the site root */
+      var parts = location.pathname.split('/');
+      var root = /\.github\.io$/.test(location.hostname) && parts[1] ? '/' + parts[1] + '/' : '/';
+      if (/^https?:/.test(location.protocol)) document.write('<base href="' + root + '">');
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300..700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <section class="hero notfound">
+      <div class="aurora" aria-hidden="true"><i></i><i></i></div>
+      <p class="code">Error 404</p>
+      <h1>This page does not exist.</h1>
+      <p class="lead">The link may be old or mistyped. The home page has everything.</p>
+      <a class="cta" href="./">Back to the home page</a>
+    </section>
+  </main>
+</body>
+</html>
