@@ -19,6 +19,13 @@
   --snow-a: 169, 201, 226;
   --snow-b: 207, 226, 242;
 
+  /* scenery: pine greens, dawn sky, and the campfire warmth (used only at the camp) */
+  --pine: #9fb8a6;
+  --pine-2: #bccfc0;
+  --dawn: #fde7ef;
+  --ember: #f4b183;
+  --ember-2: #ea8f5c;
+
   /* spacing scale */
   --s1: 4px;
   --s2: 8px;
@@ -63,6 +70,11 @@
   --line-strong: #544a6b;
   --snow-a: 160, 185, 215;
   --snow-b: 205, 218, 236;
+  --pine: #4a5f52;
+  --pine-2: #3c4f45;
+  --dawn: #3a2f44;
+  --ember: #f0a868;
+  --ember-2: #e2894f;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 10px 28px rgba(0, 0, 0, 0.25);
   --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.25), 0 18px 40px rgba(0, 0, 0, 0.32);
 }
@@ -217,21 +229,33 @@ main:focus { outline: none; }
   transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, fill 0.35s ease, stroke 0.35s ease !important;
 }
 
-/* hero */
-.hero {
+/* the illustrated band: the hero and the portrait share one continuous scene */
+.scene-band {
+  --ground: clamp(72px, 11vh, 118px);
   position: relative;
   isolation: isolate;
   overflow: clip;
+  background: linear-gradient(180deg, var(--dawn) 0%, var(--bg-2) 18%, var(--bg) 52%);
+}
+.scene-band > section { position: relative; z-index: 1; }
+.scene, .snow, .camp { position: absolute; pointer-events: none; }
+.snow { inset: 0; z-index: 0; width: 100%; height: 100%; }
+/* the ridges stand on the ground line; everything below it is open valley floor */
+.scene { left: 0; right: 0; bottom: var(--ground); z-index: 0; width: 100%; height: auto; }
+.sky { position: absolute; top: 0; left: 0; z-index: 0; width: 100%; height: clamp(180px, 34vh, 320px); pointer-events: none; }
+.ground { position: absolute; left: 0; right: 0; bottom: 0; z-index: 0; height: var(--ground); pointer-events: none; }
+
+/* hero */
+.hero {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: clamp(var(--s3), 4vw, var(--s6));
-  min-height: 78vh;
-  padding: clamp(var(--s5), 7vh, var(--s7)) var(--gutter) clamp(var(--s6), 8vh, var(--s7));
-  background: linear-gradient(180deg, var(--bg-2), var(--bg) 70%);
+  min-height: 46vh;
+  padding: clamp(var(--s5), 7vh, var(--s7)) var(--gutter) clamp(var(--s5), 6vh, var(--s6));
 }
 .hero > * { position: relative; z-index: 1; }
-.snow { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
 
 #name {
   margin: 0;
@@ -307,11 +331,9 @@ main:focus { outline: none; }
 }
 @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
-/* mountain ridge under the hero */
-.ridge { display: block; width: 100%; height: clamp(70px, 9vw, 120px); margin-bottom: calc(var(--s5) * -1); }
-.ridge path { transition: transform 0.2s linear; }
-.ridge-far { fill: var(--ice); transform: translateY(calc(var(--rp, 0) * 10px)); }
-.ridge-near { fill: var(--lavender); transform: translateY(calc(var(--rp, 0) * -5px)); }
+/* silhouette dividers between sections */
+.divider { position: relative; line-height: 0; }
+.divider svg { display: block; width: 100%; height: clamp(26px, 3.4vw, 46px); }
 
 /* blocks */
 .block {
@@ -320,9 +342,7 @@ main:focus { outline: none; }
   grid-template-columns: minmax(120px, 1fr) minmax(0, 3fr);
   gap: clamp(var(--s3), 4vw, var(--s6));
   padding: clamp(var(--s6), 9vh, var(--s7)) var(--gutter);
-  border-top: 1px solid var(--line);
 }
-.ridge + .block, .ridge + .portrait { border-top: 0; }
 .block h2 {
   margin: 0;
   color: var(--accent);
@@ -342,8 +362,9 @@ main:focus { outline: none; }
   align-items: start;
 }
 .about-wrap.has-photo { grid-template-columns: minmax(180px, 280px) minmax(0, var(--measure)); }
-.portrait { display: flex; justify-content: center; padding: clamp(var(--s4), 4vh, var(--s6)) var(--gutter) clamp(var(--s6), 9vh, var(--s7)); }
-.portrait .photo { width: min(100%, 320px); }
+/* -7px closes the transparent margin under the cut-out so she stands on the line */
+.portrait { display: flex; justify-content: center; padding: 0 var(--gutter) calc(var(--ground) - 7px); }
+.portrait .photo { width: min(100%, 290px); }
 .photo { margin: 0; }
 .photo img { display: block; width: 100%; height: auto; }
 
@@ -473,7 +494,7 @@ main:focus { outline: none; }
 }
 .links a:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
-.foot { padding: var(--s5) var(--gutter) var(--s6); border-top: 1px solid var(--line); color: var(--text-soft); font-size: 0.9rem; }
+.foot { padding: var(--s5) var(--gutter) var(--s6); color: var(--text-soft); font-size: 0.9rem; }
 .foot p { margin: 0; }
 
 /* 404 page */
@@ -526,6 +547,212 @@ main:focus { outline: none; }
   .js .rv { opacity: 1; transform: none; transition: none; }
   .js .repos.go .repo:not(.skel) { animation: none; }
   .repos, .repo, .repo:hover, .hero-art, .hiker { transform: none; transition: none; }
-  .ridge path { transform: none; }
   .theme-fade, .theme-fade *, .theme-fade *::before, .theme-fade *::after { transition: none !important; }
+}
+
+/* the scene layers drift at different rates as the band scrolls (JS sets --sy) */
+.scene g, .scene rect { transition: transform 0.25s linear; }
+.sc-stars { transform: translateY(calc(var(--sy, 0) * 26px)); }
+.sc-sky   { transform: translateY(calc(var(--sy, 0) * 24px)); }
+.sc-far   { transform: translateY(calc(var(--sy, 0) * 20px)); }
+.sc-mid   { transform: translateY(calc(var(--sy, 0) * 13px)); }
+.sc-near  { transform: translateY(calc(var(--sy, 0) * 7px)); }
+.sc-trees { transform: translateY(calc(var(--sy, 0) * 2px)); }
+
+/* camp corner: small cosy camp in the lower-left of the hero scene */
+.scene-band > .camp {
+  position: absolute;
+  z-index: 0;                 /* behind the z-index:1 sections of the band */
+  right: clamp(16px, 17vw, 310px);   /* the hero button is always on the left */
+  bottom: calc(var(--ground) - 6px);
+  width: clamp(150px, 15vw, 205px);
+  height: auto;
+  pointer-events: none;
+}
+
+/* one line style everywhere */
+.camp path, .camp circle {
+  fill: none;
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.camp .ground { stroke: var(--pine-2); }
+.camp .guy { stroke: var(--text-soft); stroke-opacity: .45; }
+.camp .log { stroke: var(--pine); }
+.camp .t-body { fill: var(--lavender); stroke: var(--text-soft); stroke-opacity: .5; }
+.camp .t-back { fill: var(--ice); stroke: var(--text-soft); stroke-opacity: .5; }
+.camp .t-door { fill: var(--pine-2); stroke: var(--text-soft); stroke-opacity: .5; }
+
+/* flames: filled, no stroke; warm tones live only here */
+.camp .fl { stroke: none; transform-box: fill-box; transform-origin: bottom center; }
+.camp .fl-a, .camp .fl-c { fill: var(--ember); }
+.camp .fl-b { fill: var(--ember-2); }
+.camp .fl-a { animation: camp-flick-a 1.4s ease-in-out infinite; }
+.camp .fl-b { animation: camp-flick-b 1.1s ease-in-out 0.2s infinite; }
+.camp .fl-c { animation: camp-flick-c 1.7s ease-in-out 0.5s infinite; }
+
+@keyframes camp-flick-a {
+  0%, 100% { transform: scale(1, 1) translateX(0); }
+  30%      { transform: scale(0.9, 1.12) translateX(-4%); }
+  65%      { transform: scale(1.07, 0.93) translateX(3%); }
+}
+@keyframes camp-flick-b {
+  0%, 100% { transform: scale(1, 1); opacity: 1; }
+  40%      { transform: scale(0.86, 1.16) translateX(4%); opacity: 0.92; }
+  75%      { transform: scale(1.08, 0.9); opacity: 1; }
+}
+@keyframes camp-flick-c {
+  0%, 100% { transform: scale(1, 1) translateX(0); opacity: 0.9; }
+  45%      { transform: scale(1.1, 0.88) translateX(-3%); opacity: 0.7; }
+  80%      { transform: scale(0.92, 1.1) translateX(2%); opacity: 1; }
+}
+
+/* smoke: faint puffs that rise and fade in their own lane */
+.camp .puff {
+  fill: var(--line-strong);
+  stroke: none;
+  opacity: 0.28;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: camp-smoke 7s linear infinite;
+}
+.camp .puff-2 { animation-duration: 8s; animation-delay: 2.4s; }
+.camp .puff-3 { animation-duration: 9s; animation-delay: 4.6s; }
+
+@keyframes camp-smoke {
+  0%   { transform: translate(0, 0) scale(0.7); opacity: 0; }
+  20%  { opacity: 0.3; }
+  70%  { opacity: 0.2; }
+  100% { transform: translate(-3px, -26px) scale(1.35); opacity: 0; }
+}
+
+/* pause off-screen / hidden tab */
+.paused .camp .fl, .paused .camp .puff,
+.band-rest .camp .fl, .band-rest .camp .puff { animation-play-state: paused; }
+
+/* narrow screens: shrink; 760px is where the hero itself restacks */
+@media (max-width: 760px) {
+  .scene-band > .camp { width: clamp(104px, 26vw, 150px); right: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* flames settle to their static shapes, puffs stay as a faint still curl */
+  .camp .fl, .camp .puff { animation: none; transform: none; }
+}
+/* ---- section seams: shallow ridge + pine dividers --------------------------
+   Both share one 0 0 1440 48 box and one band path, so they read as a family.
+   The band is a thin ribbon floating in the page background rather than a mass
+   filled to the bottom edge: that is what keeps it seamless against --bg and
+   lets a seam sit between any two sections without a tonal step.
+   Static by design: no transitions, no keyframes, nothing to pause.          */
+
+.seam {
+  display: block;
+  width: 100%;
+  height: clamp(18px, 3.3vw, 46px);
+  /* pulls the seam into the neighbouring section's padding so the vertical
+     rhythm of the page is unchanged; -1px kills sub-pixel edges */
+  margin: calc(var(--s4) * -1) 0 -1px;
+  pointer-events: none;
+}
+
+.seam-band  { fill: var(--ice); }
+.seam-pines { fill: var(--pine-2); }
+
+
+/* ============ trail detail set: one shared line style ============ */
+.trek-trail,
+.compass,
+.gi {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+/* hidden icon sprite (not display:none — that can break <use> references) */
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* 18px gear icons as list markers / section accents */
+.gi { display: inline-block; width: 18px; height: 18px; flex: none; vertical-align: -3px; color: var(--pine); }
+.gi.accent { color: var(--accent-2); }
+
+/* ---- boot-print trail ---- */
+.trek-trail {
+  --draw: 1;                /* no-JS fallback: fully drawn */
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  margin-inline: auto;
+  color: var(--text-soft);
+}
+.js .trek-trail { --draw: 0; }
+.trail-line { stroke-dasharray: 1.6 9; stroke-opacity: .6; }   /* the dotted trail itself */
+/* wiping with a scaled rect keeps the reveal on transform alone */
+.wipe { transform-box: fill-box; transform-origin: 0 50%; transform: scaleX(var(--draw, 1)); }
+.bp { opacity: clamp(0, (var(--draw, 1) - var(--n, 0)) * 7, 1); }
+.bp > use { transform: translateY(calc(3px * (1 - clamp(0, (var(--draw, 1) - var(--n, 0)) * 7, 1)))); }
+
+/* ---- compass ---- */
+.compass { display: block; color: var(--accent-2); }
+.cp-hub { fill: currentColor; stroke: none; }
+.cp-needle {                               /* settled: also the no-JS state */
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+.js .cp-needle { transform: rotate(-140deg); }   /* swung, waiting to settle */
+.compass.in .cp-needle {                   /* settling state */
+  animation: cp-settle 1.2s cubic-bezier(.17, 1.5, .33, 1) forwards;
+}
+@keyframes cp-settle {
+  from { transform: rotate(-140deg); }
+  to   { transform: rotate(0deg); }
+}
+.paused .compass.in .cp-needle { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .trek-trail, .js .trek-trail { --draw: 1 !important; }
+  .bp { opacity: 1 !important; }
+  .bp > use { transform: none; }
+  .cp-needle, .compass.in .cp-needle { transform: none; animation: none; }
+}
+
+/* --- scenery wiring ------------------------------------------------------ */
+.divider .seam { margin: 0; height: clamp(22px, 3.2vw, 44px); }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* the boot-print trail lies along the ground line, leading up to the portrait */
+.trek-trail {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--ground) * 0.72);
+  width: auto;
+  height: calc(var(--ground) * 1.45);
+  transform: translateX(-62%);
+}
+
+/* gear icons as list markers */
+.gi { width: 18px; height: 18px; fill: none; stroke: var(--accent-2); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.treks li .gi { align-self: center; }
+
+/* the compass keeps the footer company */
+.foot { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); }
+.foot .compass { flex: none; width: 38px; height: 38px; fill: none; stroke: var(--line-strong); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.foot .compass .cp-needle { fill: var(--accent-2); stroke: none; }
+.foot .compass .cp-hub { fill: var(--surface); stroke: var(--line-strong); }
+
+@media (max-width: 680px) {
+  /* the range keeps its presence on a narrow screen instead of shrinking away */
+  .scene { height: clamp(170px, 26vh, 240px); }
+}
+
+/* the pine seam keeps its aspect so the firs stay firs */
+.divider .seam-pine { height: auto; }
+@media (max-width: 560px) {
+  .divider .seam-pine .seam-pines { display: none; }
 }

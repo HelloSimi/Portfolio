@@ -121,30 +121,32 @@ var CONFIG = {
 
   if (on.tagline) $('tagline').textContent = CONFIG.tagline; else drop($('tagline'));
 
+  /* the cut-out stands in the scenery by default; when About is on it moves up beside that text */
   var photoFig = document.querySelector('.photo');
-  if (!on.about) {
-    drop($('about'));
-    if (CONFIG.photo) {
-      var portrait = document.createElement('section');
-      portrait.className = 'portrait';
-      portrait.setAttribute('aria-label', 'Portrait of ' + CONFIG.name);
-      portrait.appendChild(photoFig);
-      (document.querySelector('.ridge') || document.querySelector('.hero')).insertAdjacentElement('afterend', portrait);
-    }
-  } else {
-    if (CONFIG.photo) $('about').querySelector('.about-wrap').classList.add('has-photo'); else drop(photoFig);
-    CONFIG.about.forEach(function (t) {
-      var p = document.createElement('p');
-      p.textContent = t;
-      $('about-body').appendChild(p);
-    });
+  var portrait = $('portrait');
+  if (portrait) portrait.setAttribute('aria-label', 'Portrait of ' + CONFIG.name);
+  if (!on.about) drop($('about'));
+  if (!CONFIG.photo) {
+    drop(photoFig);
+    drop(portrait);
+  } else if (on.about) {
+    var wrap = $('about').querySelector('.about-wrap');
+    wrap.classList.add('has-photo');
+    wrap.insertBefore(photoFig, $('about-body'));
+    drop(portrait);
   }
+  if (on.about) CONFIG.about.forEach(function (t) {
+    var p = document.createElement('p');
+    p.textContent = t;
+    $('about-body').appendChild(p);
+  });
 
   if (!on.skills) drop($('work'));
   if (!on.treks) drop($('treks'));
   else CONFIG.treks.forEach(function (t) {
     var li = document.createElement('li');
-    li.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20 L9 6 L13 13 L16 9 L22 20 Z"/></svg>';
+    var gear = ['icon-boot', 'icon-pack', 'icon-lantern'];
+    li.innerHTML = '<svg class="gi" aria-hidden="true" focusable="false"><use href="#' + gear[$('trek-list').children.length % 3] + '"/></svg>';
     var mid = el('div');
     mid.appendChild(el('span', 'trek-place', t.place || ''));
     if (t.note) mid.appendChild(el('span', 'trek-note', t.note));
@@ -168,6 +170,21 @@ var CONFIG = {
     if (!$(a.getAttribute('href').slice(1))) drop(a);
   });
   if (!nav.children.length) drop(nav);
+
+  /* ridge and pine silhouettes stand in for plain rules between the sections that survived */
+  var shown = document.querySelectorAll('main .block');
+  for (var di = 1; di < shown.length; di++) {
+    shown[di].insertAdjacentElement('beforebegin', divider(di));
+  }
+  if (shown.length) document.querySelector('.foot').insertAdjacentElement('beforebegin', divider(shown.length));
+  function divider(i) {
+    var t = $(i % 2 ? 'div-pine' : 'div-ridge');
+    var holder = document.createElement('div');
+    holder.className = 'divider';
+    holder.setAttribute('aria-hidden', 'true');
+    if (t) holder.appendChild(t.content.cloneNode(true));
+    return holder;
+  }
 
   (on.skills ? CONFIG.skills : []).forEach(function (s) {
     var li = document.createElement('li');
@@ -216,7 +233,7 @@ var CONFIG = {
     var canvas = $('snow');
     if (!canvas) return;
     if (reduceMotion) { drop(canvas); return; }
-    var hero = document.querySelector('.hero');
+    var band = document.querySelector('.scene-band');
     var ctx = canvas.getContext('2d');
     var flakes = [], w = 0, h = 0, raf = 0, last = 0, onScreen = true;
     var tones = ['169, 201, 226', '207, 226, 242'];
@@ -242,8 +259,8 @@ var CONFIG = {
     }
     function size() {
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = hero.clientWidth;
-      h = hero.clientHeight;
+      w = band.clientWidth;
+      h = band.clientHeight;
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -277,14 +294,14 @@ var CONFIG = {
     run(true);
     snowRefresh = readColors;
 
-    if (window.ResizeObserver) new ResizeObserver(size).observe(hero);
+    if (window.ResizeObserver) new ResizeObserver(size).observe(band);
     else window.addEventListener('resize', size);
     document.addEventListener('visibilitychange', function () { run(!document.hidden && onScreen); });
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (entries) {
         onScreen = entries[0].isIntersecting;
         run(onScreen && !document.hidden);
-      }).observe(hero);
+      }).observe(band);
     }
   })();
 
@@ -334,18 +351,46 @@ var CONFIG = {
 
   /* the walker climbs the trail as the page scrolls, and the ridge drifts a little */
   var trail = document.querySelector('.trail');
-  var ridge = document.querySelector('.ridge');
+  var scene = document.querySelector('.scene');
+  var sceneBand = document.querySelector('.scene-band');
   var scrollRaf = 0;
   function progress() {
     scrollRaf = 0;
     var max = document.documentElement.scrollHeight - innerHeight;
     var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
     trail.style.setProperty('--p', p.toFixed(4));
-    if (ridge && !reduceMotion) {
-      var r = ridge.getBoundingClientRect();
-      var rp = ((r.top + r.height / 2) / innerHeight - 0.5) * 2;
-      ridge.style.setProperty('--rp', Math.max(-1, Math.min(1, rp)).toFixed(3));
+    if (trekTrail) {
+      /* boot prints appear as the ground line climbs into view */
+      var g = sceneBand.getBoundingClientRect();
+      var seen = reduceMotion ? 1 : (innerHeight - g.bottom) / Math.max(1, innerHeight * 0.55) + 0.35;
+      trekTrail.style.setProperty('--draw', Math.min(1, Math.max(0, seen)).toFixed(3));
     }
+    if (scene && !reduceMotion) {
+      /* 0 at the top of the page, 1 once the band has scrolled by its own height */
+      var moved = Math.min(1.4, Math.max(0, window.scrollY / Math.max(1, sceneBand.offsetHeight)));
+      scene.style.setProperty('--sy', moved.toFixed(3));
+    }
+  }
+
+  var trekTrail = document.querySelector('.trek-trail');
+
+  /* the compass needle settles the first time the footer comes into view */
+  var compass = document.querySelector('.compass');
+  if (compass) {
+    if (reduceMotion || !('IntersectionObserver' in window)) compass.classList.add('in');
+    else {
+      var cio = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) { compass.classList.add('in'); cio.disconnect(); }
+      }, { threshold: 0.4 });
+      cio.observe(compass);
+    }
+  }
+
+  /* the camp only burns while it is on screen */
+  if (sceneBand && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      sceneBand.classList.toggle('band-rest', !entries[0].isIntersecting);
+    }).observe(sceneBand);
   }
   window.addEventListener('scroll', function () { if (!scrollRaf) scrollRaf = requestAnimationFrame(progress); }, { passive: true });
   window.addEventListener('resize', progress);
