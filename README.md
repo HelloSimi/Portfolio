@@ -14,6 +14,15 @@ The portrait photo has its own switch, `photo`. It can stay on even when the Abo
 
 A part that is switched on but has no text is skipped too.
 
+## Choose which projects show
+
+Projects are loaded from your public GitHub repositories and kept for ten minutes, so reloading the page is fast. Two optional lists in `CONFIG` control what appears:
+
+- `pinned`: repository names to show first, in the order you list them, for example `pinned: ['my-best-project']`. A pinned fork is shown too.
+- `hideRepos`: repository names to leave out, for example `hideRepos: ['old-test']`.
+
+Both are empty by default. Forks that are not pinned stay hidden. When your repositories use two or more languages, filter buttons appear above the list.
+
 ## Run locally
 
 Open `index.html` in a browser, or serve the folder:

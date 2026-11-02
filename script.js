@@ -15,6 +15,8 @@ var CONFIG = {
     contact: true
   },
   photo: true,                             // portrait photo; works even when the About text is hidden
+  pinned: [],                              // repository names to show first, e.g. ['my-best-project']
+  hideRepos: [],                           // repository names to leave out
   about: [
     'Write two or three sentences about yourself here: who you are, what you are learning or building, and what you want to do next.',
     'A second short paragraph is optional.'
@@ -230,42 +232,196 @@ var CONFIG = {
   /* projects from GitHub */
   var list = $('repo-list');
   if (!list) return;
-  function setStatus(msg) {
+  var profileUrl = 'https://github.com/' + encodeURIComponent(CONFIG.githubUser);
+  var CACHE_KEY = 'repos:' + CONFIG.githubUser.toLowerCase();
+  var CACHE_MS = 10 * 60 * 1000;
+  var chipBox = null;
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+  function readCache() {
+    try {
+      var c = JSON.parse(sessionStorage.getItem(CACHE_KEY));
+      if (c && Array.isArray(c.repos) && Date.now() - c.t < CACHE_MS) return c.repos;
+    } catch (e) {}
+    return null;
+  }
+  function writeCache(repos) {
+    try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), repos: repos })); } catch (e) {}
+  }
+  function slim(r) {
+    return {
+      name: r.name, html_url: r.html_url, description: r.description, language: r.language,
+      stars: r.stargazers_count || 0, fork: !!r.fork, pushed: r.pushed_at || r.updated_at
+    };
+  }
+
+  function setStatus(node) {
     list.innerHTML = '';
-    var li = document.createElement('li');
-    li.className = 'repo-status';
-    li.textContent = msg;
+    list.removeAttribute('aria-busy');
+    if (chipBox) { drop(chipBox); chipBox = null; }
+    var li = el('li', 'repo-status');
+    li.appendChild(node);
     list.appendChild(li);
   }
-  function card(repo) {
-    var li = document.createElement('li');
-    li.className = 'repo';
-    var a = document.createElement('a');
-    a.href = repo.html_url; a.target = '_blank'; a.rel = 'noopener';
-    var n = document.createElement('span'); n.className = 'repo-name'; n.textContent = repo.name;
-    a.appendChild(n);
-    if (repo.description) {
-      var d = document.createElement('span'); d.className = 'repo-desc'; d.textContent = repo.description;
-      a.appendChild(d);
+  function profileLink() {
+    var a = el('a', null, 'github.com/' + CONFIG.githubUser);
+    a.href = profileUrl; a.target = '_blank'; a.rel = 'noopener';
+    return a;
+  }
+  function showError(limited) {
+    var p = el('p', 'repo-note', limited
+      ? 'GitHub is limiting requests for a moment, so projects cannot load right now. Try again in a few minutes, or see them at '
+      : 'Projects could not be loaded right now. You can see them at ');
+    p.appendChild(profileLink());
+    p.appendChild(document.createTextNode('.'));
+    setStatus(p);
+  }
+  function showEmpty() {
+    var box = el('div', 'empty');
+    box.innerHTML = '<svg viewBox="0 0 120 80" aria-hidden="true"><path class="e-line" d="M20 60 H60 V20 H100"/><circle class="e-node" cx="20" cy="60" r="6"/><circle class="e-node" cx="60" cy="20" r="6"/><circle class="e-pulse" cx="100" cy="20" r="6"/></svg>';
+    box.appendChild(el('p', null, 'Projects will show up here automatically after the first public repository is created.'));
+    setStatus(box);
+  }
+  function showSkeleton() {
+    list.innerHTML = '';
+    list.setAttribute('aria-busy', 'true');
+    list.appendChild(el('li', 'sr-only', 'Loading projects from GitHub…'));
+    for (var i = 0; i < 3; i++) {
+      var li = el('li', 'repo skel');
+      li.setAttribute('aria-hidden', 'true');
+      li.innerHTML = '<span class="bar w40"></span><span class="bar w90"></span><span class="bar w25"></span>';
+      list.appendChild(li);
     }
-    var bits = [];
-    if (repo.language) bits.push(repo.language);
-    bits.push('Updated ' + new Date(repo.pushed_at || repo.updated_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short' }));
-    var m = document.createElement('span'); m.className = 'repo-meta'; m.textContent = bits.join(', ');
+  }
+
+  function card(repo, i) {
+    var li = el('li', 'repo');
+    li.style.setProperty('--i', i);
+    var a = el('a');
+    a.href = repo.html_url; a.target = '_blank'; a.rel = 'noopener';
+    a.appendChild(el('span', 'repo-name', repo.name));
+    if (repo.description) a.appendChild(el('span', 'repo-desc', repo.description));
+    var m = el('span', 'repo-meta');
+    if (repo.language) m.appendChild(el('span', 'lang', repo.language));
+    if (repo.stars) m.appendChild(el('span', 'stars', '★ ' + repo.stars));
+    m.appendChild(el('span', null, 'Updated ' + new Date(repo.pushed).toLocaleDateString(undefined, { year: 'numeric', month: 'short' })));
     a.appendChild(m);
     li.appendChild(a);
+    li.dataset.lang = repo.language || '';
+    if (fine && !reduceMotion) tilt(li);
     return li;
   }
 
-  fetch('https://api.github.com/users/' + encodeURIComponent(CONFIG.githubUser) + '/repos?sort=pushed&per_page=12')
-    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(function (repos) {
-      var shown = repos.filter(function (r) { return !r.fork; });
-      if (!shown.length) { setStatus('Projects will show up here as soon as the first public repository is created.'); return; }
-      list.innerHTML = '';
-      shown.forEach(function (r) { list.appendChild(card(r)); });
-    })
-    .catch(function () {
-      setStatus('Projects could not be loaded right now. See them on github.com/' + CONFIG.githubUser + '.');
+  /* gentle 3D tilt with a soft highlight that follows the pointer */
+  function tilt(li) {
+    li.addEventListener('pointermove', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      var r = li.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      li.style.setProperty('--ry', ((x - 0.5) * 6).toFixed(2) + 'deg');
+      li.style.setProperty('--rx', ((0.5 - y) * 5).toFixed(2) + 'deg');
+      li.style.setProperty('--hx', (x * 100).toFixed(0) + '%');
+      li.style.setProperty('--hy', (y * 100).toFixed(0) + '%');
     });
+    li.addEventListener('pointerleave', function () {
+      li.style.removeProperty('--rx');
+      li.style.removeProperty('--ry');
+    });
+  }
+
+  /* pinned first (in the order listed), hidden ones removed, forks only when pinned */
+  function arrange(repos) {
+    var low = function (a) { return (a || []).map(function (n) { return String(n).toLowerCase(); }); };
+    var pinned = low(CONFIG.pinned), hidden = low(CONFIG.hideRepos);
+    var rest = repos.filter(function (r) {
+      var n = r.name.toLowerCase();
+      return hidden.indexOf(n) < 0 && pinned.indexOf(n) < 0 && !r.fork;
+    });
+    var first = [];
+    pinned.forEach(function (n) {
+      repos.forEach(function (r) { if (r.name.toLowerCase() === n && hidden.indexOf(n) < 0) first.push(r); });
+    });
+    return first.concat(rest).slice(0, Math.max(12, first.length));
+  }
+
+  function replay(items) {
+    items.forEach(function (li, n) {
+      li.style.setProperty('--i', n);
+      li.style.animation = 'none';
+      void li.offsetWidth;
+      li.style.animation = '';
+    });
+  }
+
+  function buildChips(cards) {
+    var langs = [];
+    cards.forEach(function (c) { if (c.dataset.lang && langs.indexOf(c.dataset.lang) < 0) langs.push(c.dataset.lang); });
+    if (langs.length < 2) return;
+    chipBox = el('div', 'chips');
+    chipBox.setAttribute('role', 'group');
+    chipBox.setAttribute('aria-label', 'Filter projects by language');
+    ['All'].concat(langs).forEach(function (name, idx) {
+      var b = el('button', 'chip', name);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', idx === 0 ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        Array.prototype.forEach.call(chipBox.children, function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+        var apply = function () {
+          var shown = [];
+          cards.forEach(function (c) {
+            var ok = idx === 0 || c.dataset.lang === name;
+            c.hidden = !ok;
+            if (ok) shown.push(c);
+          });
+          list.classList.remove('filtering');
+          if (!reduceMotion) replay(shown);
+        };
+        if (reduceMotion) { apply(); return; }
+        list.classList.add('filtering');
+        setTimeout(apply, 180);
+      });
+      chipBox.appendChild(b);
+    });
+    list.parentNode.insertBefore(chipBox, list);
+  }
+
+  function render(repos) {
+    var items = arrange(repos);
+    if (!items.length) { showEmpty(); return; }
+    list.innerHTML = '';
+    list.removeAttribute('aria-busy');
+    var cards = items.map(card);
+    cards.forEach(function (c) { list.appendChild(c); });
+    buildChips(cards);
+  }
+
+  /* cards animate in once the list is on screen */
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    var seen = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) { list.classList.add('go'); seen.disconnect(); }
+    }, { threshold: 0.1 });
+    seen.observe(list);
+  } else {
+    list.classList.add('go');
+  }
+
+  var cached = readCache();
+  if (cached) { render(cached); return; }
+  showSkeleton();
+  fetch('https://api.github.com/users/' + encodeURIComponent(CONFIG.githubUser) + '/repos?sort=pushed&per_page=100')
+    .then(function (r) {
+      if (!r.ok) { var err = new Error(r.status); err.status = r.status; throw err; }
+      return r.json();
+    })
+    .then(function (repos) {
+      var data = repos.map(slim);
+      writeCache(data);
+      render(data);
+    })
+    .catch(function (err) { showError(err && (err.status === 403 || err.status === 429)); });
 })();
