@@ -264,7 +264,7 @@ var CONFIG = {
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      var count = Math.max(10, Math.min(42, Math.round(w / 28)));
+      var count = Math.max(8, Math.min(30, Math.round(w / 40)));
       while (flakes.length > count) flakes.pop();
       while (flakes.length < count) flakes.push(flake(Math.random() * h));
     }
@@ -327,14 +327,11 @@ var CONFIG = {
     if (snowRefresh) snowRefresh();
   });
 
-  /* pointer effects: avatar parallax and magnetic button. Fine pointers only. */
+  /* the main button leans toward a nearby pointer. Fine pointers only. */
   var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  var art = document.querySelector('.hero-art');
   var ptr = { x: 0, y: 0, raf: 0 };
   function tick() {
     ptr.raf = 0;
-    art.style.setProperty('--px', ((ptr.x / innerWidth - 0.5) * 14).toFixed(1) + 'px');
-    art.style.setProperty('--py', ((ptr.y / innerHeight - 0.5) * 10).toFixed(1) + 'px');
     if (cta.parentNode) {
       var r = cta.getBoundingClientRect(), dx = ptr.x - (r.left + r.width / 2), dy = ptr.y - (r.top + r.height / 2);
       var near = Math.hypot(dx, dy) < r.width / 2 + 70;
@@ -351,7 +348,9 @@ var CONFIG = {
 
   /* the walker climbs the trail as the page scrolls, and the ridge drifts a little */
   var trail = document.querySelector('.trail');
-  var scene = document.querySelector('.scene');
+  var scene = document.querySelector('.hero-scene');
+  var header = document.querySelector('.top');
+  var hero = document.querySelector('.hero');
   var sceneBand = document.querySelector('.scene-band');
   var scrollRaf = 0;
   function progress() {
@@ -359,6 +358,7 @@ var CONFIG = {
     var max = document.documentElement.scrollHeight - innerHeight;
     var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
     trail.style.setProperty('--p', p.toFixed(4));
+    if (header && hero) header.classList.toggle('on-sky', window.scrollY < hero.offsetHeight - header.offsetHeight * 2);
     if (trekTrail) {
       /* boot prints appear as the ground line climbs into view */
       var g = sceneBand.getBoundingClientRect();
@@ -400,6 +400,193 @@ var CONFIG = {
   document.addEventListener('visibilitychange', function () {
     document.documentElement.classList.toggle('paused', document.hidden);
   });
+
+  /* camp life: her own avatar, cut at the shoulders and hips, goes about the camp on a loop.
+     One requestAnimationFrame loop drives it, and it rests while the hero is off screen. */
+  (function camp() {
+    var stage = document.querySelector('.camp-stage');
+    if (!stage) return;
+    var q = function (sel) { return stage.querySelector(sel); };
+    var simi = q('.simi'), mover = q('.mover'), shadow = q('.simi-shadow');
+    var armL = q('.arm-l'), armR = q('.arm-r'), legL = q('.leg-l'), legR = q('.leg-r');
+    var lids = stage.querySelectorAll('.lid');
+    var heldLog = q('.p-log'), stick = q('.p-stick'), toast = q('.mallow.toast'), mug = q('.p-mug');
+    var thrown = q('.thrown'), fire = q('.fire');
+
+    var S = 0.335, FEET = 560;                       // rig scale, and the ground line in stage units
+    var SPOT = { door: 700, wood: 572, fire: 384, view: 612 };
+    var SPEED = 86, STRIDE = 30;                     // stage units per second, units per step
+
+    /* what she does, in order, forever */
+    var plan = [
+      ['wave', 2.8], ['walk', 'wood'], ['pick', 1.5], ['walk', 'fire'], ['toss', 1.5],
+      ['warm', 4.5], ['toast', 7], ['walk', 'door'], ['getmug', 1.2], ['walk', 'view'],
+      ['admire', 5.5], ['walk', 'fire'], ['warmmug', 4.5], ['walk', 'door'], ['putdown', 1.1]
+    ];
+
+    var pose = { x: SPOT.door, al: 0, ar: 0, lean: 0, log: 0, stick: 0, mug: 0 };
+    var step = 0, stepStart = 0, phase = 0, nextBlink = 1.5, flareUntil = 0;
+    var raf = 0, last = 0, clock = 0, onScreen = true, released = null;
+
+    function bump(u) { return Math.sin(Math.PI * Math.min(1, Math.max(0, u))); }
+    function ease(u) { u = Math.min(1, Math.max(0, u)); return u * u * (3 - 2 * u); }
+    function approach(cur, target, dt, rate) { return cur + (target - cur) * (1 - Math.exp(-dt * rate)); }
+
+    /* where the left hand is on the stage, so a thrown log leaves from her actual hand */
+    function handPoint(al, lean, bob) {
+      var a = al * Math.PI / 180, hx = 80 - 122, hy = 615 - 352;
+      var px = 122 + hx * Math.cos(a) - hy * Math.sin(a);
+      var py = 352 + hx * Math.sin(a) + hy * Math.cos(a) + bob;
+      var l = lean * Math.PI / 180, dx = px - 206.5, dy = py - 900;
+      px = 206.5 + dx * Math.cos(l) - dy * Math.sin(l);
+      py = 900 + dx * Math.sin(l) + dy * Math.cos(l);
+      return { x: pose.x - 206.5 * S + px * S, y: FEET - 900 * S + py * S };
+    }
+
+    function frame(now) {
+      raf = requestAnimationFrame(frame);
+      var dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      clock += dt;
+      tick(dt, clock);
+    }
+
+    function tick(dt, t) {
+      var act = plan[step], u = 0, target = { al: 2, ar: -2, lean: 0, log: pose.log, stick: 0, mug: pose.mug };
+      var walking = false, dir = 0, throwU = -1;
+
+      if (act[0] === 'walk') {
+        var goal = SPOT[act[1]], dist = goal - pose.x;
+        dir = dist > 0 ? 1 : -1;
+        if (Math.abs(dist) < 0.6) { pose.x = goal; next(t); }
+        else {
+          walking = true;
+          var v = SPEED * Math.min(1, Math.abs(dist) / 34 + 0.25, (t - stepStart) * 3 + 0.25);
+          var moveBy = Math.min(Math.abs(dist), v * dt);
+          pose.x += dir * moveBy;
+          phase += moveBy / STRIDE * Math.PI;
+          target.al = pose.log ? 6 : 3;
+          target.ar = pose.mug ? 10 : -3;
+        }
+      } else {
+        u = (t - stepStart) / act[1];
+        if (u >= 1) { next(t); u = 1; }
+        var k = act[0];
+        if (k === 'wave') { var held = ease(u / 0.2) * ease((1 - u) / 0.2); target.ar = (-104 + 12 * Math.sin(t * 9)) * held; }
+        else if (k === 'pick') { target.lean = -7 * bump(u); target.al = 4 + 20 * bump(u); if (u > 0.55) target.log = 1; }
+        else if (k === 'toss') {
+          target.al = u < 0.3 ? -6 : u < 0.6 ? 52 : 12;
+          target.lean = u > 0.3 && u < 0.7 ? -3 : 0;
+          if (u >= 0.48 && !released) { released = handPoint(pose.al, pose.lean, 0); }
+          target.log = u >= 0.48 ? 0 : 1;
+          throwU = released ? (u - 0.48) / 0.4 : -1;
+        }
+        else if (k === 'warm') { target.al = 30 + 3 * Math.sin(t * 5); target.ar = 16 + 3 * Math.sin(t * 5 + 1.6); }
+        else if (k === 'toast') {
+          target.stick = u < 0.93 ? 1 : 0;
+          target.al = 36 + 2 * Math.sin(t * 2.3);
+          target.ar = 4;
+          toast.style.opacity = ease((u - 0.2) / 0.7).toFixed(3);
+        }
+        else if (k === 'getmug') { target.ar = -14 * bump(u); if (u > 0.45) target.mug = 1; }
+        else if (k === 'admire') { target.ar = 9; target.al = 2 + 2 * Math.sin(t * 0.8); target.lean = 1.3 * Math.sin(t * 0.6); }
+        else if (k === 'warmmug') { target.al = 28 + 2.5 * Math.sin(t * 4.5); target.ar = 10; }
+        else if (k === 'putdown') { target.ar = -14 * bump(u); if (u > 0.5) target.mug = 0; }
+      }
+
+      /* ease every joint toward where the action wants it */
+      pose.al = approach(pose.al, target.al, dt, act[0] === 'toss' ? 16 : 7);
+      pose.ar = approach(pose.ar, target.ar, dt, act[0] === 'wave' ? 10 : 7);
+      pose.lean = approach(pose.lean, target.lean, dt, 6);
+      pose.log = target.log === 0 ? 0 : approach(pose.log, target.log, dt, 10);
+      if (act[0] === 'walk' && pose.log) pose.log = 1;
+      pose.stick = approach(pose.stick, target.stick, dt, 8);
+      pose.mug = approach(pose.mug, target.mug, dt, 9);
+
+      /* the walk cycle, breathing and a little sway layered on top */
+      var s = Math.sin(phase), bob, lean = pose.lean, al = pose.al, ar = pose.ar, liftL = 0, liftR = 0, rotL = 0, rotR = 0;
+      if (walking) {
+        bob = -6 * Math.abs(s);
+        lean += 1.5 * s + dir * 1.2;
+        al += 5 * s;
+        ar += 5 * s;
+        liftL = -9 * Math.max(0, s);
+        liftR = -9 * Math.max(0, -s);
+        rotL = dir * 4 * Math.max(0, s);
+        rotR = dir * 4 * Math.max(0, -s);
+      } else {
+        bob = 1.6 * Math.sin(t * 1.8);
+        lean += 0.6 * Math.sin(t * 0.7);
+        al += 1.2 * Math.sin(t * 1.1);
+        ar -= 1.2 * Math.sin(t * 1.3);
+      }
+
+      simi.setAttribute('transform', 'translate(' + (pose.x - 206.5 * S).toFixed(2) + ' ' + (FEET - 900 * S).toFixed(2) + ') scale(' + S + ')');
+      mover.setAttribute('transform', 'rotate(' + lean.toFixed(2) + ' 206.5 900) translate(0 ' + bob.toFixed(2) + ')');
+      armL.setAttribute('transform', 'rotate(' + al.toFixed(2) + ' 122 352)');
+      armR.setAttribute('transform', 'rotate(' + ar.toFixed(2) + ' 318 352)');
+      legL.setAttribute('transform', 'translate(0 ' + liftL.toFixed(2) + ') rotate(' + rotL.toFixed(2) + ' 172 512)');
+      legR.setAttribute('transform', 'translate(0 ' + liftR.toFixed(2) + ') rotate(' + rotR.toFixed(2) + ' 282 512)');
+      shadow.setAttribute('cx', pose.x.toFixed(1));
+      shadow.setAttribute('rx', (54 + bob * 0.7).toFixed(1));
+      heldLog.style.opacity = pose.log.toFixed(3);
+      stick.style.opacity = pose.stick.toFixed(3);
+      mug.style.opacity = pose.mug.toFixed(3);
+      if (act[0] !== 'toast' && pose.stick < 0.05) toast.style.opacity = '0';
+
+      /* a log in flight: leaves her hand, arcs over and lands in the fire */
+      if (throwU >= 0 && throwU <= 1) {
+        var from = released, w = ease(throwU);
+        var x = (1 - w) * (1 - w) * from.x + 2 * (1 - w) * w * ((from.x + 263) / 2) + w * w * 263;
+        var y = (1 - w) * (1 - w) * from.y + 2 * (1 - w) * w * (Math.min(from.y, 500) - 70) + w * w * 528;
+        thrown.setAttribute('transform', 'translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ') rotate(' + (-200 * w).toFixed(1) + ') scale(.42 .47)');
+        thrown.style.opacity = throwU < 0.92 ? '1' : '0';
+        if (throwU > 0.9 && t > flareUntil) { fire.classList.add('flare'); flareUntil = t + 1.4; }
+      } else {
+        thrown.style.opacity = '0';
+      }
+      if (flareUntil && t > flareUntil - 0.2) { fire.classList.remove('flare'); }
+
+      /* she blinks every few seconds, quickly, like anyone does */
+      var lid = 0;
+      if (t > nextBlink) {
+        var bt = (t - nextBlink) / 0.17;
+        if (bt >= 1) nextBlink = t + 2.2 + Math.random() * 3.6;
+        else lid = Math.sin(Math.PI * bt);
+      }
+      for (var i = 0; i < lids.length; i++) lids[i].style.transform = 'scaleY(' + lid.toFixed(3) + ')';
+    }
+
+    function next(t) {
+      released = null;
+      step = (step + 1) % plan.length;
+      stepStart = t;
+    }
+
+    if (reduceMotion) {
+      /* a single, still moment by the fire */
+      pose.x = SPOT.fire;
+      pose.al = 28;
+      pose.ar = 14;
+      plan = [['warm', 1e9]];
+      tick(0, 0);
+      return;
+    }
+
+    function run(go) {
+      if (go && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+      if (!go && raf) { cancelAnimationFrame(raf); raf = 0; }
+    }
+    tick(0, 0);
+    run(true);
+    document.addEventListener('visibilitychange', function () { run(!document.hidden && onScreen); });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        onScreen = entries[0].isIntersecting;
+        run(onScreen && !document.hidden);
+      }).observe(stage);
+    }
+  })();
 
   /* projects from GitHub */
   var list = $('repo-list');
