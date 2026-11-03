@@ -11,6 +11,7 @@ Open `script.js`. The block at the very top, called `CONFIG`, is the only part y
 - `links`: the buttons in the Contact section. Add a line for each one, for example email or LinkedIn (examples are in the file, just remove the `//`).
 - `githubUser`: your GitHub username. Your public repositories are listed as projects automatically.
 - `badge`: the short text that circles around the avatar.
+- `credit`: `false` by default. Set it to `true` to show a small "Design and code by Simran Rekhi" line in the footer, linking to this repository.
 
 Keep the quotes and commas as they are in the file. If the page goes blank, a quote or comma was probably removed.
 
@@ -68,3 +69,11 @@ Repository → Settings → Pages → Deploy from a branch → `main` / root →
 - `script.js`: your `CONFIG` plus the page behaviour.
 - `404.html`: the "page not found" page.
 - `images/`: the avatar and the portrait photo. Replace a file with another of the same name to change it.
+
+## Licence and credits
+
+The code is MIT licensed (see `LICENSE`). Anyone may use, copy and change it, as long as the copyright notice and licence text stay with it.
+
+If you use this site as a template, please credit the author in your site footer. This is a polite request, not a legal condition. Setting `credit: true` in `CONFIG` adds the line for you.
+
+The MIT licence covers the code only. The images in the `images/` folder and all personal content (name, photos, cartoon avatar and written text) are not covered by it. They remain the owner's and must not be reused without permission.

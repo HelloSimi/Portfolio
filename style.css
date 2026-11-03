@@ -750,6 +750,8 @@ main:focus { outline: none; }
 
 .foot { padding: var(--s5) var(--gutter) var(--s6); color: var(--text-soft); font-size: 0.9rem; }
 .foot p { margin: 0; }
+.foot .credit { display: block; margin-top: 0.25rem; font-size: 0.8rem; color: inherit; opacity: 0.8; }
+.foot .credit:hover { opacity: 1; }
 
 /* 404 page */
 .notfound { min-height: calc(100vh - 80px); grid-template-columns: minmax(0, 1fr); justify-items: start; align-content: center; }
