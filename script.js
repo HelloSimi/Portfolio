@@ -15,7 +15,8 @@ var CONFIG = {
     projects: true,
     contact: true
   },
-  photo: true,                             // portrait photo; works even when the About text is hidden
+  credit: false,                           // true = small "Design and code by" line in the footer
+  photo: true,                           // portrait photo; works even when the About text is hidden
   treks: [                                 // walks and treks, shown when sections.treks is true
     // { place: 'Trail or peak name', note: 'One short line about it.', year: '2024' }
   ],
@@ -52,6 +53,13 @@ var CONFIG = {
   $('logo').textContent = (CONFIG.name.trim().charAt(0) || 'h').toLowerCase();
   $('badge-text').textContent = CONFIG.badge;
   $('foot').textContent = '© ' + new Date().getFullYear() + ' ' + CONFIG.name;
+  if (CONFIG.credit) {
+    var credit = document.createElement('a');
+    credit.className = 'credit';
+    credit.href = 'https://github.com/HelloSimi/Portfolio';
+    credit.textContent = 'Design and code by Simran Rekhi';
+    $('foot').appendChild(credit);
+  }
 
   /* name, split into letters that decode on load and wobble when touched */
   var nameEl = $('name');
