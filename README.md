@@ -47,6 +47,25 @@ The site opens in Day. The three small buttons in the top corner (sun, sunset an
 
 The page also sets its title and sharing text from `CONFIG`: the tagline when it is shown, otherwise a short line with your name.
 
+## Optional pose pictures
+
+The two characters roam the valley using the original pictures, and the scene needs nothing else. To give them more poses, put transparent PNGs with the feet at the bottom edge in `images/poses/` and list them in `images/poses/poses.json`:
+
+```
+{
+  "c-walk-right-1.png": { "facing": "right", "kind": "stand", "set": "c" },
+  "c-walk-right-2.png": { "facing": "right", "kind": "stand", "set": "c" },
+  "c-sit.png": { "facing": "right", "kind": "sit", "set": "c" },
+  "b-walk-away-1.png": { "facing": "back", "kind": "stand", "set": "b" }
+}
+```
+
+List only files that are really in the folder. Sets `a` and `c` belong to the avatar and set `b` to the portrait; a file name starting `avatar-` or `person-`, or `"who": "avatar"` or `"who": "person"`, works too. When sets `a` and `c` offer the same pose, the avatar uses `c`.
+
+The name says what a picture is for: `walk-right`, `walk-away`, `walk-front` (numbered ones play in turn as she walks), `sit`, `sit-talk`, `sit-mug`, `carry-wood`, `toast`, `hold-mug`, `wave`, `look-mountains`, `river-lean`, `crouch-fire` and `talk`.
+
+Sideways pictures are mirrored for the other direction; add `"mirror": false` if the art should not be flipped. Two more settings are optional: `"height"` sets the picture's height as a share of her standing height, and `"hands"` says where the hands are, so carried things line up, for example `[[0.3, 0.6], [0.7, 0.6]]` as left and right positions measured across and down the picture. Anything not listed keeps the original artwork.
+
 ## Run it on your computer
 
 Open `index.html` in a browser. Or serve the folder, which behaves more like the real site:
@@ -68,3 +87,4 @@ Repository → Settings → Pages → Deploy from a branch → `main` / root →
 - `script.js`: your `CONFIG` plus the page behaviour.
 - `404.html`: the "page not found" page.
 - `images/`: the avatar and the portrait photo. Replace a file with another of the same name to change it.
+- `images/poses/`: optional pose pictures and their list, `poses.json`.
