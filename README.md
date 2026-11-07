@@ -97,3 +97,7 @@ The code is MIT licensed (see `LICENSE`). Anyone may use, copy and change it, as
 If you use this site as a template, please credit the author in your site footer. This is a polite request, not a legal condition. Setting `credit: true` in `CONFIG` adds the line for you.
 
 The MIT licence covers the code only. The images in the `images/` folder and all personal content (name, photos, cartoon avatar and written text) are not covered by it. They remain the owner's and must not be reused without permission.
+
+## Made by
+
+Simran Rekhi ([@HelloSimi](https://github.com/HelloSimi)) and Sifat Ahmed ([@hellosifat-dev](https://github.com/hellosifat-dev)) built this site together.
